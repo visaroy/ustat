@@ -1,0 +1,17 @@
+#!/bin/bash
+# config file
+
+database="this_is_database"
+
+# influxdb
+influxdb="true"
+influxdb_host="localhost"
+influxdb_port="8086"
+influxdb_database=`hostname`
+influxdb_user="user"
+influxdb_password="password"
+
+# opentsdb
+opentsdb="false"
+opentsdb_host="localhost"
+opentsdb_port="4242"
