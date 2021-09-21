@@ -5,7 +5,7 @@
 # main goals: POSIX/GNU/Linux portability, simple and lightweight, used BASH only with a few standard
 # dependiences
 
-source ./config
+source /etc/ustat
 
 #if $influxdb; then
 #  send_to_influxdb

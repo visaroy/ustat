@@ -1,0 +1,39 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides: cooking by Visaroy
+# Required-Start:
+# Required-Stop:
+# Default-Start:
+# Default-Stop:      6
+# Short-Description: 'ustat' send data to timeseries database
+# Description:
+### END INIT INFO
+
+cat > /dev/null << HELP
+copy '/usr/bin/ustat' file to /usr/bin
+chmod +x /usr/bin/ustat
+copy '/etc/init.d/ustat' file to /etc/init.d
+chmod +x /etc/init.d/ustat
+cd /etc/init.d/
+update-rc.d -v ustat start 99 3 . stop 99 6 .
+HELP
+
+case "$1" in
+start)
+        if [ -e "/usr/bin/ustat -t 5 -w" ] ; then
+                /usr/bin/ustat &
+        fi
+        ;;
+stop)
+  killall -s KILL /usr/bin/ustat 2>/dev/null
+  ;;
+restart|reload)
+ $0 stop
+ sleep 1
+ $0 start
+        ;;
+*)
+        echo "Usage: $0 start|stop|restart"
+        exit 1
+        ;;
+esac

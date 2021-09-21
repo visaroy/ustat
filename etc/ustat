@@ -1,7 +1,4 @@
-#!/bin/bash
-# config file
-
-database="this_is_database"
+#ustat config file
 
 # influxdb
 influxdb="true"
@@ -15,3 +12,6 @@ influxdb_password="password"
 opentsdb="false"
 opentsdb_host="http://localhost"
 opentsdb_port="4242"
+
+# network stats
+network_interface="eth0"
