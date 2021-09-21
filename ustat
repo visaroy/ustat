@@ -4,8 +4,6 @@
 # cooking by dariusz@porczynski.net mishmash for now ... but working :)
 # main goals: POSIX/GNU/Linux portability, simple and lightweight, used BASH only with a few standard
 # dependiences
-# Usage: ustat -r   read database
-
 
 source ./config
 
@@ -32,37 +30,98 @@ read_proc_loadavg () {
   print "put '$eth0_mac_address'.proc.loadavg.15m " now " " $3 " host=" host; }' /proc/loadavg
 }
 
+read_proc_load () {
+  now_timestamp=`date +%s`
+  awk '{ print $1 }' /proc/loadavg
+#  proc_loadawg_1=(awk '{ print $1 }' /proc/loadavg)
+#  echo $proc_loadavg_1
+}
+
+read_network_stats () {
+  timestamp=`date +%s`
+  rx=$(grep $1 /proc/net/dev | awk '{print $2}')
+  tx=$(grep $1 /proc/net/dev | awk '{print $10}')
+  network_usage=$(cat /proc/net/dev | grep "$1:" | cut -f2 -d':' | awk '{print $1}')
+  return
+}
+
 show_databases () {
   curl -G "$influxdb_host:$influxdb_port/query?pretty=true" --data-urlencode 'q=SHOW DATABASES'
 }
 
 read_database () {
 #  echo "read influxdb_database at $influxdb_host:$influxdb_port/query?db=$influxdb_database&pretty=true"
-  curl -G "$influxdb_host:$influxdb_port/query?db=$influxdb_database&pretty=true" --data-urlencode 'q=SELECT * FROM "$indluxdb_database"'
+  curl -G "$influxdb_host:$influxdb_port/query?db=$influxdb_database" --data-urlencode 'q=SELECT * FROM "$indluxdb_database"'
 }
 
-send_to_influxdb () {
+create_database () {
+  echo "create database $influxdb_database"
+#  curl -XPOST "$influxdb_host:$influxdb_port/query" -s --data-urlencode 'q=CREATE DATABASE "$influxdb_database"'
+  curl -XPOST "$influxdb_host:$influxdb_port/query" -s --data-urlencode "q=CREATE DATABASE $influxdb_database"
+}
+
+drop_database () {
+  echo "drop database $influxdb_database"
+  curl -XPOST "$influxdb_host:$influxdb_port/query" -s --data-urlencode "q=DROP DATABASE $influxdb_database"
+}
+
+write_a_point_to_influxdb () {
+  curl -i XPOST "$influxdb_host:$influxdb_port/write?db=h3test&precision=s" --data-binary "$influxdb_database,interface=$network_interface rx=$rx $timestamp"
+}
+
+write_loop () {
   while true; do
-    curl -XPOST $influxdb_host:$influxdb_port/query -s --data-urlencode "q=CREATE DATABASE $database" > /dev/null
-    sleep 10
+    curl -i XPOST "$influxdb_host:$influxdb_port/write?db=h3test&precision=s" --data-binary "$influxdb_database,interface=$network_interface rx=$rx $timestamp"
+    sleep $interval
     echo "done..."
   done
 }
 
 ustat_help () {
   echo -e "usage: ustat <-option>\n\
-  -r\t\t read_database\n\
-  -s\t\t show_databases"
+  -b \t\t\t verbose\n\
+  -c \t\t\t read_database\n\
+  -d \t\t\t drop_database\n\
+  -i [database] \t database name\n\
+  -o [network_interface] \t network interface eg. -o eth0\n\
+  -p \t\t\t read_proc_load\n\
+  -r \t\t\t read_database\n\
+  -s \t\t\t show_databases\n\
+  -t [interval] \t interval in seconds eg. -t 5\n\
+  -w \t\t\t write a point to influxdb database\n\
+"
 }
 
-while getopts 'b r s' opt
+while getopts 'b c d h i: o p r s t: w' opt
 do
   case "${opt}" in
     b ) _VERBOSE="true"
     ;;
-    r ) read_database; exit 0
+    c ) create_database
     ;;
-    s ) show_databases; exit 0
+    d ) drop_database
+    ;;
+    h ) ustat_help
+    ;;
+    i ) influxdb_database="$OPTARG"; echo "influxdb_database=$OPTARG"
+    ;;
+    o ) read_network_stats $network_interface; echo -e "timestamp=$timestamp rx=$rx tx=$tx"
+    ;;
+    p ) read_proc_load
+    ;;
+    r ) read_database
+    ;;
+    s ) show_databases
+    ;;
+    t ) interval="$OPTARG"
+      while true; do
+        read_network_stats $network_interface
+        echo -e "timestamp=$timestamp rx=$rx tx=$tx"
+        write_a_point_to_influxdb
+        sleep $interval
+      done
+    ;;
+    w ) write_a_point_to_influxdb
     ;;
     :) echo "Option -$OPTARG requires an argument." >&2
     ;;
