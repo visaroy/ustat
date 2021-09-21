@@ -2,14 +2,16 @@
 # simple collect system data from amd64, arm64, armel, armhf, i386, mips64el, mipsel, ppc64el, s390x
 # and send to the timeseries databases
 # cooking by dariusz@porczynski.net mishmash for now ... but working :)
-# main goals: POSIX/GNU/Linux portability, simple and lightweight, used BASH only with few standard
+# main goals: POSIX/GNU/Linux portability, simple and lightweight, used BASH only with a few standard
 # dependiences
+# Usage: ustat -r   read database
+
 
 source ./config
 
-if $influxdb; then
-  send_to_influxdb
-fi
+#if $influxdb; then
+#  send_to_influxdb
+#fi
 
 
 # database based on mac address for now, TODO: crypted, based on UUID and/or hardware IDs
@@ -30,10 +32,42 @@ read_proc_loadavg () {
   print "put '$eth0_mac_address'.proc.loadavg.15m " now " " $3 " host=" host; }' /proc/loadavg
 }
 
+show_databases () {
+  curl -G "$influxdb_host:$influxdb_port/query?pretty=true" --data-urlencode 'q=SHOW DATABASES'
+}
+
+read_database () {
+#  echo "read influxdb_database at $influxdb_host:$influxdb_port/query?db=$influxdb_database&pretty=true"
+  curl -G "$influxdb_host:$influxdb_port/query?db=$influxdb_database&pretty=true" --data-urlencode 'q=SELECT * FROM "$indluxdb_database"'
+}
+
 send_to_influxdb () {
   while true; do
-    curl -POST http://$influxdb_host:$influxdb_port/query -s --data-urlencode "q=CREATE DATABASE $database" > /dev/null
+    curl -XPOST $influxdb_host:$influxdb_port/query -s --data-urlencode "q=CREATE DATABASE $database" > /dev/null
     sleep 10
     echo "done..."
   done
 }
+
+ustat_help () {
+  echo -e "usage: ustat <-option>\n\
+  -r\t\t read_database\n\
+  -s\t\t show_databases"
+}
+
+while getopts 'b r s' opt
+do
+  case "${opt}" in
+    b ) _VERBOSE="true"
+    ;;
+    r ) read_database; exit 0
+    ;;
+    s ) show_databases; exit 0
+    ;;
+    :) echo "Option -$OPTARG requires an argument." >&2
+    ;;
+    * )  ustat_help; exit 0
+    ;;
+  esac
+done
+shift $((OPTIND-1))
