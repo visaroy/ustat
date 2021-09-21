@@ -3,7 +3,7 @@
 
 case $1 in
     "--force")
-    rm /etc/ustat
+#    rm /etc/ustat
     rm /usr/bin/ustat
     rm /etc/init.d/ustat
     ;;

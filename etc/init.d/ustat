@@ -20,8 +20,8 @@ HELP
 
 case "$1" in
 start)
-        if [ -e "/usr/bin/ustat -t 5 -w" ] ; then
-                /usr/bin/ustat &
+        if [ -e "/usr/bin/ustat" ] ; then
+                /usr/bin/ustat -t 5 -w &
         fi
         ;;
 stop)
