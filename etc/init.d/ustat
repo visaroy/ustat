@@ -21,7 +21,7 @@ HELP
 case "$1" in
 start)
         if [ -e "/usr/bin/ustat" ] ; then
-                /usr/bin/ustat -t 5 -w &
+                /usr/bin/ustat -w &
         fi
         ;;
 stop)

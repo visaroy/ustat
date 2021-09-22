@@ -1,17 +1,15 @@
-#ustat config file
-
+# [old.bash.style]
 # influxdb
-influxdb="true"
-influxdb_host="http://localhost"
-influxdb_port="8086"
-influxdb_database=`hostname`
-influxdb_user="user"
-influxdb_password="password"
+#influxdb="true"
+#influxdb_host="http://localhost:8086"
+#influxdb_database=`hostname`
+#influxdb_user="user"
+#influxdb_password="password"
 
 # opentsdb
-opentsdb="false"
-opentsdb_host="http://localhost"
-opentsdb_port="4242"
+#opentsdb="false"
+#opentsdb_host="http://localhost"
+#opentsdb_port="4242"
 
 # network stats
 network_interface="eth0"

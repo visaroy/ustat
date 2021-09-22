@@ -1,17 +1,24 @@
 #!/bin/bash
-# simple collect system data from amd64, arm64, armel, armhf, i386, mips64el, mipsel, ppc64el, s390x
+# simple collect data from linux system amd64, arm64, armel, armhf, i386, mips64el, mipsel, ppc64el, s390x
 # and send to the timeseries databases
 # cooking by dariusz@porczynski.net mishmash for now ... but working :)
 # main goals: POSIX/GNU/Linux portability, simple and lightweight, used BASH only with a few standard
 # dependiences
 
-source /etc/ustat
+# parse config file
+config="/etc/ustat.conf"
+. <(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf | grep database | sed 's/ *= */=/g')
+influxdb_database=$database
+. <(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf | grep urls | sed 's/\[//g' | sed 's/\]//g' | sed 's/ *= */=/g')
+influxdb_host=$urls
+. <(sed -nE "/^\[agent\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf | sed 's/ *= */=/g' | grep " interval" | sed 's/ *= */=/g')
+interval=$interval
+. <(sed -nE "/^\[\[inputs\.net\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf | grep "interfaces" | sed 's/ *= */=/g' | sed 's/\[/\(/g' | sed 's/\]/\)/g' | sed 's/,/ /g')
+for network_interface in ${interfaces[@]}; do
+  echo $interface
+done
 
-#if $influxdb; then
-#  send_to_influxdb
-#fi
-
-
+# . /etc/ustat.conf
 # database based on mac address for now, TODO: crypted, based on UUID and/or hardware IDs
 read_eth0_mac_address=`cat /sys/class/net/eth0/address | tr ':' ' ' | tr '\n' ' ' | sed 's/[[:space:]]//g'`
 
@@ -46,32 +53,34 @@ read_network_stats () {
 }
 
 show_databases () {
-  curl -G "$influxdb_host:$influxdb_port/query?pretty=true" --data-urlencode 'q=SHOW DATABASES'
+  curl -G "$influxdb_host/query?pretty=true" --data-urlencode 'q=SHOW DATABASES'
 }
 
 read_database () {
-#  echo "read influxdb_database at $influxdb_host:$influxdb_port/query?db=$influxdb_database&pretty=true"
-  curl -G "$influxdb_host:$influxdb_port/query?db=$influxdb_database" --data-urlencode 'q=SELECT * FROM "$indluxdb_database"'
+#  echo "read influxdb_database at $influxdb_host/query?db=$influxdb_database&pretty=true"
+  curl -G "$influxdb_host/query?db=$influxdb_database" --data-urlencode 'q=SELECT * FROM "$indluxdb_database"'
 }
 
 create_database () {
   echo "create database $influxdb_database"
-#  curl -XPOST "$influxdb_host:$influxdb_port/query" -s --data-urlencode 'q=CREATE DATABASE "$influxdb_database"'
-  curl -XPOST "$influxdb_host:$influxdb_port/query" -s --data-urlencode "q=CREATE DATABASE $influxdb_database"
+#  curl -XPOST "$influxdb_host/query" -s --data-urlencode 'q=CREATE DATABASE "$influxdb_database"'
+  curl -XPOST "$influxdb_host/query" -s --data-urlencode "q=CREATE DATABASE $influxdb_database"
 }
 
 drop_database () {
   echo "drop database $influxdb_database"
-  curl -XPOST "$influxdb_host:$influxdb_port/query" -s --data-urlencode "q=DROP DATABASE $influxdb_database"
+  curl -XPOST "$influxdb_host/query" -s --data-urlencode "q=DROP DATABASE $influxdb_database"
 }
 
 write_a_point_to_influxdb () {
-  curl -i XPOST "$influxdb_host:$influxdb_port/write?db=h3test&precision=s" --data-binary "$influxdb_database,interface=$network_interface rx=$rx $timestamp"
+  measurement="$1"
+  rx="$2"
+  curl -i XPOST "$influxdb_host/write?db=$influxdb_database&precision=s" --data-binary "$measurement,interface=$network_interface rx=$rx $timestamp"
 }
 
 write_loop () {
   while true; do
-    curl -i XPOST "$influxdb_host:$influxdb_port/write?db=h3test&precision=s" --data-binary "$influxdb_database,interface=$network_interface rx=$rx $timestamp"
+    curl -i XPOST "$influxdb_host/write?db=h3test&precision=s" --data-binary "$influxdb_database,interface=$network_interface rx=$rx $timestamp"
     sleep $interval
     echo "done..."
   done
@@ -114,14 +123,14 @@ do
     s ) show_databases
     ;;
     t ) interval="$OPTARG"
-      while true; do
-        read_network_stats $network_interface
-        echo -e "timestamp=$timestamp rx=$rx tx=$tx"
-        write_a_point_to_influxdb
-        sleep $interval
-      done
     ;;
-    w ) write_a_point_to_influxdb
+    w )
+    while true; do
+      read_network_stats $network_interface
+      echo -e "timestamp=$timestamp rx=$rx tx=$tx"
+      write_a_point_to_influxdb $influxdb_database $rx
+      sleep $interval
+    done
     ;;
     :) echo "Option -$OPTARG requires an argument." >&2
     ;;

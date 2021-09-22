@@ -3,17 +3,17 @@
 
 case $1 in
     "--force")
-#    rm /etc/ustat
+#    rm /etc/ustat.conf
     rm /usr/bin/ustat
     rm /etc/init.d/ustat
     ;;
 esac
 
-if [ -f /etc/ustat ]; then
-    echo "[OK] ustat config file already in /etc/ustat"
+if [ -f /etc/ustat.conf ]; then
+    echo "[OK] ustat config file already in /etc/ustat.conf"
 else
-    cp ./etc/ustat /etc/ustat
-    echo "[OK] ustat config file coppied to /etc/ustat"
+    cp ./etc/ustat.conf /etc/ustat.conf
+    echo "[OK] ustat config file coppied to /etc/ustat.conf"
 fi
 
 if [ -x /usr/bin/ustat ]; then
