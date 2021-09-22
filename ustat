@@ -5,6 +5,20 @@
 # main goals: POSIX/GNU/Linux portability, simple and lightweight, used BASH only with a few standard
 # dependiences
 
+# selfupdate from github
+case $1 in
+    "--update")
+    github_archive="https://github.com/visaroy/ustat/archive/refs/heads/master.zip"
+    if ! wget -nv -O /tmp/ustat.zip --no-check-certificate $github_archive; then
+      echo '[NOK] ERROR: there is no file $github_archive on the server...'
+      rm -rf /opt/busy4me/$UPDATE_FILE.new
+    else
+      unzip /tmp/ustat.zip
+      sh /tmp/ustat-master/install.sh --force
+    fi
+    ;;
+esac
+
 # parse config file
 config="/etc/ustat.conf"
 . <(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf | grep database | sed 's/ *= */=/g')
