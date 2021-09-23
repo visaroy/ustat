@@ -120,9 +120,12 @@ drop_database () {
 }
 
 write_a_point_to_influxdb () {
-  measurement="$1"
-  rx="$2"
-  curl -i XPOST "$influxdb_host/write?db=$influxdb_database&precision=s" --data-binary "$measurement,interface=$network_interface rx=$rx $timestamp"
+  influxdb_database="$1"
+  measurement="$2"
+  tag1="$3"
+  rx="$4"
+  timestamp="$5"
+  curl -i XPOST "$influxdb_host/write?db=$influxdb_database&precision=s" --data-binary "$measurement,interface=$tag1 rx=$rx $timestamp"
 }
 
 write_loop () {
@@ -175,8 +178,9 @@ do
     show_databases
     while true; do
       read_network_stats $network_interface
-      echo -e "timestamp=$timestamp rx=$rx tx=$tx"
-      write_a_point_to_influxdb $influxdb_database $rx
+      echo -e "influxdb_database=$influxdb_database measurement=$influxdb_database tag1=$network_interface \
+      rx=$rx tx=$tx timestamp=$timestamp"
+      write_a_point_to_influxdb $influxdb_database $measurement $tag1 $rx $timestamp
       sleep $interval
     done
     ;;
