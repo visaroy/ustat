@@ -36,4 +36,4 @@ else
     echo "[OK] ustat service installed, usage: service ustat start"
 fi
 
-echo "use 'install.sh --force' if you want to reinstall files..."
+echo "- use 'install.sh --force' if you want to to reinstall ..."
