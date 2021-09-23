@@ -50,8 +50,6 @@ interval=$(sed -nE "/^\[agent\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/u
 | sed 's/"//g')
 echo $interval
 
-. <(sed -nE "/^\[\[inputs\.net\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf | grep "interfaces" | sed 's/ *= */=/g' | sed 's/\[/\(/g' | sed 's/\]/\)/g' | sed 's/,/ /g')
-
 interfaces=$(sed -nE "/^\[\[inputs\.net\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
 | grep "interfaces" \
 | sed 's/ *= */=/g' \
