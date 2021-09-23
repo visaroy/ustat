@@ -27,11 +27,12 @@ esac
 
 # parse config file
 config="/etc/ustat.conf"
-influx_database=$(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
+influxdb_database=$(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
 | grep database \
 | sed 's/ *= */=/g' \
 | sed 's/database=//g' \
-| sed 's/"//g')
+| sed 's/"//g' \
+| tr -d ' ')
 echo $influxdb_database
 
 influxdb_host=$(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
@@ -48,7 +49,8 @@ interval=$(sed -nE "/^\[agent\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/u
 | grep " interval" \
 | sed 's/ *= */=/g' \
 | sed 's/interval=//g' \
-| sed 's/"//g')
+| sed 's/"//g' \
+| tr -d ' ')
 echo $interval
 
 interfaces=$(sed -nE "/^\[\[inputs\.net\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
