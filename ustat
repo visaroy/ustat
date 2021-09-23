@@ -16,8 +16,10 @@ case $1 in
       unzip -o /tmp/ustat.zip
       cd /tmp/ustat-master
       sh /tmp/ustat-master/install.sh --force
+      cd /tmp; rm -R /tmp/ustat*
     fi
     ;;
+    exit 0
 esac
 
 # parse config file
