@@ -8,7 +8,8 @@
 # selfupdate from github
 case $1 in
     "--update")
-    /etc/init.d/ustat stop
+    if ps -e >2&/dev/null; then _PS="ps -e"; else _PS="ps"; fi # check what command to show processes
+    process=$($_PS | grep ustat | grep -v grep | grep -v $0)
     github_archive="https://github.com/visaroy/ustat/archive/refs/heads/master.zip"
     rm -R /tmp/ustat* > 2&/dev/null
     if ! wget -nv -O /tmp/ustat.zip --no-check-certificate $github_archive; then
@@ -19,7 +20,7 @@ case $1 in
       sh /tmp/ustat-master/install.sh --force
       cd /tmp; rm -R /tmp/ustat*
     fi
-    /etc/init.d/ustat start
+    (sleep 1; /etc/init.d/ustat stop && /etc/init.d/ustat start)
     exit 0
     ;;
 esac
