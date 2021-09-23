@@ -62,6 +62,7 @@ interfaces=$(sed -nE "/^\[\[inputs\.net\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b 
 | sed 's/interfaces=//g')
 for network_interface in ${interfaces}; do
   network_interface=$(echo $network_interface | tr -d '"()')
+  echo $network_interface
 done
 
 # . /etc/ustat.conf
