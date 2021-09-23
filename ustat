@@ -40,7 +40,8 @@ influxdb_host=$(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^
 | sed 's/\]//g' \
 | sed 's/ *= */=/g' \
 | sed 's/urls=//g' \
-| sed 's/"//g')
+| sed 's/"//g' \
+| tr -d ' ')
 echo $influxdb_host
 
 interval=$(sed -nE "/^\[agent\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
@@ -168,6 +169,7 @@ do
     t ) interval="$OPTARG"
     ;;
     w )
+    show_databases
     while true; do
       read_network_stats $network_interface
       echo -e "timestamp=$timestamp rx=$rx tx=$tx"
