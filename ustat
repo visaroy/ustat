@@ -32,7 +32,7 @@ influx_database=$(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; 
 | sed 's/ *= */=/g' \
 | sed 's/database=//g' \
 | sed 's/"//g')
-echo $influx_database
+echo $influxdb_database
 
 influxdb_host=$(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
 | grep urls \
