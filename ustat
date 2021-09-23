@@ -8,6 +8,7 @@
 # selfupdate from github
 case $1 in
     "--update")
+    /etc/init.d/ustat stop
     github_archive="https://github.com/visaroy/ustat/archive/refs/heads/master.zip"
     rm -R /tmp/ustat* > 2&/dev/null
     if ! wget -nv -O /tmp/ustat.zip --no-check-certificate $github_archive; then
@@ -18,6 +19,7 @@ case $1 in
       sh /tmp/ustat-master/install.sh --force
       cd /tmp; rm -R /tmp/ustat*
     fi
+    /etc/init.d/ustat start
     exit 0
     ;;
 esac
