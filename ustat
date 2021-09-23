@@ -9,11 +9,11 @@
 case $1 in
     "--update")
     github_archive="https://github.com/visaroy/ustat/archive/refs/heads/master.zip"
+    rm /tmp/ustat.zip >/dev/null; rm /tmp/ustat-master >/dev/null
     if ! wget -nv -O /tmp/ustat.zip --no-check-certificate $github_archive; then
       echo '[NOK] ERROR: there is no file $github_archive on the server...'
-      rm -rf /opt/busy4me/$UPDATE_FILE.new
     else
-      unzip /tmp/ustat.zip
+      unzip -o /tmp/ustat.zip
       sh /tmp/ustat-master/install.sh --force
     fi
     ;;
@@ -21,15 +21,40 @@ esac
 
 # parse config file
 config="/etc/ustat.conf"
-. <(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf | grep database | sed 's/ *= */=/g')
-influxdb_database=$database
-. <(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf | grep urls | sed 's/\[//g' | sed 's/\]//g' | sed 's/ *= */=/g')
-influxdb_host=$urls
-. <(sed -nE "/^\[agent\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf | sed 's/ *= */=/g' | grep " interval" | sed 's/ *= */=/g')
-interval=$interval
+influx_database=$(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
+| grep database \
+| sed 's/ *= */=/g' \
+| sed 's/database=//g' \
+| sed 's/"//g')
+echo $influx_database
+
+influxdb_host=$(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
+| grep urls \
+| sed 's/\[//g' \
+| sed 's/\]//g' \
+| sed 's/ *= */=/g' \
+| sed 's/urls=//g' \
+| sed 's/"//g')
+echo $influxdb_host
+
+interval=$(sed -nE "/^\[agent\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
+| grep " interval" \
+| sed 's/ *= */=/g' \
+| sed 's/interval=//g' \
+| sed 's/"//g')
+echo $interval
+
 . <(sed -nE "/^\[\[inputs\.net\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf | grep "interfaces" | sed 's/ *= */=/g' | sed 's/\[/\(/g' | sed 's/\]/\)/g' | sed 's/,/ /g')
-for network_interface in ${interfaces[@]}; do
-  echo $interface
+
+interfaces=$(sed -nE "/^\[\[inputs\.net\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
+| grep "interfaces" \
+| sed 's/ *= */=/g' \
+| sed 's/\[/\(/g' \
+| sed 's/\]/\)/g' \
+| sed 's/,/ /g' \
+| sed 's/interfaces=//g')
+for network_interface in ${interfaces}; do
+  echo $network_interface
 done
 
 # . /etc/ustat.conf
