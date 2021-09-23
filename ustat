@@ -180,7 +180,7 @@ do
       read_network_stats $network_interface
       echo -e "influxdb_database=$influxdb_database measurement=$influxdb_database tag1=$network_interface \
       rx=$rx tx=$tx timestamp=$timestamp"
-      write_a_point_to_influxdb $influxdb_database $measurement $tag1 $rx $timestamp
+      write_a_point_to_influxdb $influxdb_database $influxdb_database $network_interface $rx $timestamp
       sleep $interval
     done
     ;;
