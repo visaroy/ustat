@@ -15,10 +15,10 @@ case $1 in
     if ! wget -nv -O /tmp/ustat.zip --no-check-certificate $github_archive; then
       echo '[NOK] ERROR: there is no file $github_archive on the server...'
     else
-      unzip -o /tmp/ustat.zip
+      unzip -o -d /tmp /tmp/ustat.zip
       cd /tmp/ustat-master
       sh /tmp/ustat-master/install.sh --force
-      cd /tmp; rm -R /tmp/ustat*
+#      cd /tmp; rm -R /tmp/ustat*
     fi
     (sleep 1; /etc/init.d/ustat stop && /etc/init.d/ustat start)
     exit 0
@@ -61,12 +61,12 @@ interfaces=$(sed -nE "/^\[\[inputs\.net\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b 
 | sed 's/,/ /g' \
 | sed 's/interfaces=//g')
 for network_interface in ${interfaces}; do
-  echo $network_interface
+  network_interface=$(echo $network_interface | tr -d '"()')
 done
 
 # . /etc/ustat.conf
 # database based on mac address for now, TODO: crypted, based on UUID and/or hardware IDs
-read_eth0_mac_address=`cat /sys/class/net/eth0/address | tr ':' ' ' | tr '\n' ' ' | sed 's/[[:space:]]//g'`
+read_eth0_mac_address=`cat /sys/class/net/$network_interface/address | tr ':' ' ' | tr '\n' ' ' | sed 's/[[:space:]]//g'`
 
 initialize_matrics () {
   $read_eth0_mac_address
@@ -92,9 +92,9 @@ read_proc_load () {
 
 read_network_stats () {
   timestamp=`date +%s`
-  rx=$(grep $1 /proc/net/dev | awk '{print $2}')
-  tx=$(grep $1 /proc/net/dev | awk '{print $10}')
-  network_usage=$(cat /proc/net/dev | grep "$1:" | cut -f2 -d':' | awk '{print $1}')
+  rx=$(grep $1 /proc/net/dev | awk '{print $2}' | tr -d ' ')
+  tx=$(grep $1 /proc/net/dev | awk '{print $10}' | tr -d ' ')
+  network_usage=$(cat /proc/net/dev | grep "$1:" | cut -f2 -d':' | awk '{print $1}' | tr -d ' ')
   return
 }
 
