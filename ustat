@@ -9,7 +9,7 @@
 case $1 in
     "--update")
     github_archive="https://github.com/visaroy/ustat/archive/refs/heads/master.zip"
-    rm /tmp/ustat.zip >/dev/null; rm /tmp/ustat-master >/dev/null
+    rm -R /tmp/ustat* > 2&/dev/null
     if ! wget -nv -O /tmp/ustat.zip --no-check-certificate $github_archive; then
       echo '[NOK] ERROR: there is no file $github_archive on the server...'
     else
