@@ -20,7 +20,7 @@ case $1 in
       sh /tmp/ustat-master/install.sh --force
 #      cd /tmp; rm -R /tmp/ustat*
     fi
-    (sleep 1; /etc/init.d/ustat stop && /etc/init.d/ustat start)
+    (sleep 2; /etc/init.d/ustat stop; sleep 2; /etc/init.d/ustat start)
     exit 0
     ;;
 esac
