@@ -14,6 +14,7 @@ case $1 in
       echo '[NOK] ERROR: there is no file $github_archive on the server...'
     else
       unzip -o /tmp/ustat.zip
+      cd /tmp/ustat-master
       sh /tmp/ustat-master/install.sh --force
     fi
     ;;
