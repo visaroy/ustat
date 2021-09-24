@@ -1,13 +1,14 @@
 # ⚛️ ustat
-minimalistic script in BASH sends metrics to supported databases:  
-• influxdb  
-• *opentsdb***  
-• *prometheus***  
-• *graphite***  
-• *elasticsearch***  
+used in small** linux devices, minimalistic bash script sends metrics to supported databases:  
+* influxdb  
+* opentsdb *  
+* prometheus *  
 
-** TODO list
+* graphite *  
 
+* elasticsearch *
+
+works on amd64, arm64, armel, armhf, i386, mips64el, mipsel, ppc64el, s390x
 # 1️⃣ INSTALL ustat
 
 ⭐️ download latest version from Github  
@@ -114,3 +115,5 @@ ustat -w # write metrics to the database
 
 # Wiki
 [ustat Wiki 🚧 Under construction](https://github.com/visaroy/ustat/wiki)
+
+** TODO
