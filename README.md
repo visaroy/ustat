@@ -13,7 +13,7 @@ minimalistic script in BASH sends metrics to supported databases:
  ``` shell
 bash ./install.sh
  ```
-[...See more](https://github.com/visaroy/ustat/busy/wiki)  
+[...See more](https://github.com/visaroy/ustat)  
 
 or download zip from github
 ```
