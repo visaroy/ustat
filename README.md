@@ -15,7 +15,7 @@ minimalistic script in BASH sends metrics to supported databases:
 
  ``` shell
  wget https://github.com/visaroy/ustat/archive/refs/heads/master.zip
- unzip -o ./ustat-master.zip
+ unzip -o ./master.zip
  cd ./ustat-master
  sh ./install.sh
  ```
