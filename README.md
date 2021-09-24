@@ -1,4 +1,4 @@
-# ustat
+# ⚛️ ustat
 minimalistic script in BASH sends metrics to supported databases:  
 • influxdb  
 • *opentsdb*  
@@ -6,23 +6,27 @@ minimalistic script in BASH sends metrics to supported databases:
 • *graphite*  
 • *elasticsearch*  
 
-# INSTALL
+# 1️⃣ INSTALL ustat
 
-⭐️ on Linux machine witch bash shell, extract ustat.zip and run `./install.sh`
+⭐️ download latest version from Github  
+⭐️ on Linux machine with bash shell, extract `ustat-master.zip` and run `./install.sh`
 
  ``` shell
-bash ./install.sh
+ wget https://github.com/visaroy/ustat/archive/refs/heads/master.zip
+ unzip -o ./ustat-master.zip
+ cd ./ustat-master
+ sh ./install.sh
  ```
-[...See more](https://github.com/visaroy/ustat)  
 
-or download zip from github
-```
-wget https://github.com/visaroy/ustat/archive/refs/heads/master.zip
-unzip -o -d .ustat.zip
-cd ./ustat-master
+ or (when reinstall)
+``` shell
 sh ./install.sh --force
 ```
-⭐️ edit `/etc/ustat.conf`
+
+[...See more on Wiki page](https://github.com/visaroy/ustat/wiki)  
+
+# 2️⃣ EDIT config file
+⭐️ edit `/etc/ustat.conf`  
 
 # #
 send metrics to:
@@ -46,8 +50,23 @@ or
 
 or
 `/etc/init.d/ustat start`
-# USAGE
+# 3️⃣ USAGE
 
+☝️ `ustat` is ready as a service:  
+and in default sends metrics to the database from `/etc/ustat.conf`
+``` shell
+service ustat start
+```
+or
+``` shell
+/etc/init.d/ustat start
+```
+[...See more on Wiki page](https://github.com/visaroy/ustat/wiki)  
+
+☝️ `ustat` is ready as a command line bash script:
+``` shell
+ustat
+```
 ## -s show all databases
 ``` shell
 ustat -s
