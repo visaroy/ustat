@@ -1,10 +1,12 @@
 # ⚛️ ustat
 minimalistic script in BASH sends metrics to supported databases:  
 • influxdb  
-• *opentsdb*  
-• *prometheus*  
-• *graphite*  
-• *elasticsearch*  
+• *opentsdb***  
+• *prometheus***  
+• *graphite***  
+• *elasticsearch***  
+
+** TODO list
 
 # 1️⃣ INSTALL ustat
 
