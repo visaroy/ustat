@@ -175,8 +175,7 @@ do
     ;;
     r ) read_database
     ;;
-    s )
-    show_databases
+    s ) show_databases
     [[ $(ustat -s) =~ "$influxdb_database" ]] && echo "...database $influxdb_database found :)"
     ;;
     t ) interval="$OPTARG"
