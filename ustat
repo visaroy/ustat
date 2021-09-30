@@ -27,15 +27,15 @@ esac
 
 # parse config file
 config="/etc/ustat.conf"
-influxdb_database=$(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
+INFLUXDB_DATABASE=$(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
 | grep database \
 | sed 's/ *= */=/g' \
 | sed 's/database=//g' \
 | sed 's/"//g' \
 | tr -d ' ')
-echo $influxdb_database
+echo $INFLUXDB_DATABASE
 
-influxdb_host=$(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
+INFLUXDB_HOST=$(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
 | grep urls \
 | sed 's/\[//g' \
 | sed 's/\]//g' \
@@ -43,31 +43,31 @@ influxdb_host=$(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^
 | sed 's/urls=//g' \
 | sed 's/"//g' \
 | tr -d ' ')
-echo $influxdb_host
+echo $INFLUXDB_HOST
 
-interval=$(sed -nE "/^\[agent\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
+INTERVAL=$(sed -nE "/^\[agent\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
 | grep " interval" \
 | sed 's/ *= */=/g' \
 | sed 's/interval=//g' \
 | sed 's/"//g' \
 | tr -d ' ')
-echo $interval
+echo $INTERVAL
 
-interfaces=$(sed -nE "/^\[\[inputs\.net\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
+INTERFACES=$(sed -nE "/^\[\[inputs\.net\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
 | grep "interfaces" \
 | sed 's/ *= */=/g' \
 | sed 's/\[/\(/g' \
 | sed 's/\]/\)/g' \
 | sed 's/,/ /g' \
 | sed 's/interfaces=//g')
-for network_interface in ${interfaces}; do
-  network_interface=`echo $network_interface | tr -d '"()'`
-  echo "$network_interface"
+for NETWORK_INTERFACE in ${INTERFACES}; do
+  NETWORK_INTERFACE=`echo $NETWORK_INTERFACE | tr -d '"()'`
+  echo "$NETWORK_INTERFACE"
 done
 
 # . /etc/ustat.conf
 # database based on mac address for now, TODO: crypted, based on UUID and/or hardware IDs
-read_eth0_mac_address=`cat /sys/class/net/$network_interface/address | tr ':' ' ' | tr '\n' ' ' | sed 's/[[:space:]]//g'`
+read_eth0_mac_address=`cat /sys/class/net/$NETWORK_INTERFACE/address | tr ':' ' ' | tr '\n' ' ' | sed 's/[[:space:]]//g'`
 
 initialize_matrics () { # opendtsdb
   $read_eth0_mac_address
@@ -85,14 +85,14 @@ read_proc_loadavg () {
 }
 
 read_proc_load () {
-  now_timestamp=`date +%s`
+  NOW_TIMESTAMP=`date +%s`
   awk '{ print $1 }' /proc/loadavg
 #  proc_loadawg_1=(awk '{ print $1 }' /proc/loadavg)
 #  echo $proc_loadavg_1
 }
 
 read_network_stats () {
-  timestamp=`date +%s`
+  TIMESTAMP=`date +%s`
   rx=$(grep $1 /proc/net/dev | awk '{print $2}' | tr -d ' ')
   tx=$(grep $1 /proc/net/dev | awk '{print $10}' | tr -d ' ')
   network_usage=$(cat /proc/net/dev | grep "$1:" | cut -f2 -d':' | awk '{print $1}' | tr -d ' ')
@@ -100,42 +100,55 @@ read_network_stats () {
 }
 
 show_databases () {
-  curl -G "$influxdb_host/query?pretty=true" --data-urlencode 'q=SHOW DATABASES'
+  show_db=$(curl -G "$INFLUXDB_HOST/query?pretty=true" -s --data-urlencode 'q=SHOW DATABASES')
+  echo "$show_db"
+  [[ $show_db =~ "\"$INFLUXDB_DATABASE\"" ]] && echo "... [OK] ... database '$INFLUXDB_DATABASE' found :)"
+  [[ $show_db =~ "\"$INFLUXDB_DATABASE\"" ]] || echo ".. [NOK] ... database '$INFLUXDB_DATABASE' not found :("
+  database_found="true"
+  return
 }
 
 read_database () {
-#  echo "read influxdb_database at $influxdb_host/query?db=$influxdb_database&pretty=true"
-  curl -G "$influxdb_host/query?db=$influxdb_database" --data-urlencode 'q=SELECT * FROM "$indluxdb_database"'
+#  echo "read INFLUXDB_DATABASE at $INFLUXDB_HOST/query?db=$INFLUXDB_DATABASE&pretty=true"
+  READ_DB=$(curl -G "$INFLUXDB_HOST/query?db=$INFLUXDB_DATABASE" -s --data-urlencode 'q=SELECT * FROM "$indluxdb_database"')
+  echo "$READ_DB"
+  if [[ $READ_DB =~ "database not found" ]]; then
+    echo ".. [NOK] ... database '$INFLUXDB_DATABASE' not found :("
+    DATABASE_FOUND="false"
+  else
+    echo "... [OK] ... database '$INFLUXDB_DATABASE' found :)"
+    DATABASE_FOUND="true"
+  fi
+  return
 }
 
 create_database () {
-  if [ $(ustat -r) ! =~ "database not found" ]; then
-    [[ $(ustat -s) =~ "$influxdb_database" ]] && echo "...database $influxdb_database found :)"
+  if [[ $DATABASE_FOUND = "false" ]]; then
+    echo "DATABASE_FOUND=$DATABASE_FOUND ... create database '$INFLUXDB_DATABASE'"
+    #  curl -XPOST "$INFLUXDB_HOST/query" -s --data-urlencode 'q=CREATE DATABASE "$INFLUXDB_DATABASE"'
+    curl -XPOST "$INFLUXDB_HOST/query" -s --data-urlencode "q=CREATE DATABASE $INFLUXDB_DATABASE"
   else
-    influxdb_database="$1"
-    echo "create database $influxdb_database"
-  #  curl -XPOST "$influxdb_host/query" -s --data-urlencode 'q=CREATE DATABASE "$influxdb_database"'
-    curl -XPOST "$influxdb_host/query" -s --data-urlencode "q=CREATE DATABASE $influxdb_database"
+    echo "DATABASE_FOUND=$DATABASE_FOUND ... '$INFLUXDB_DATABASE' database exists"
   fi
 }
 
 drop_database () {
-  echo "drop database $influxdb_database"
-  curl -XPOST "$influxdb_host/query" -s --data-urlencode "q=DROP DATABASE $influxdb_database"
+  echo "drop database '$INFLUXDB_DATABASE'"
+  curl -XPOST "$INFLUXDB_HOST/query" -s --data-urlencode "q=DROP DATABASE $INFLUXDB_DATABASE"
 }
 
 write_a_point_to_influxdb () {
-  influxdb_database="$1"
+  INFLUXDB_DATABASE="$1"
   measurement="$2"
   tag1="$3"
   rx="$4"
-  timestamp="$5"
-  curl -i XPOST "$influxdb_host/write?db=$influxdb_database&precision=s" --data-binary "$measurement,interface=$tag1 rx=$rx $timestamp"
+  TIMESTAMP="$5"
+  curl -i XPOST "$INFLUXDB_HOST/write?db=$INFLUXDB_DATABASE&precision=s" --data-binary "$measurement,interface=$tag1 rx=$rx $TIMESTAMP"
 }
 
 write_loop () {
   while true; do
-    curl -i XPOST "$influxdb_host/write?db=h3test&precision=s" --data-binary "$influxdb_database,interface=$network_interface rx=$rx $timestamp"
+    curl -i XPOST "$INFLUXDB_HOST/write?db=h3test&precision=s" --data-binary "$INFLUXDB_DATABASE,interface=$NETWORK_INTERFACE rx=$rx $TIMESTAMP"
     sleep $interval
     echo "done..."
   done
@@ -161,32 +174,37 @@ do
   case "${opt}" in
     b ) _VERBOSE="true"
     ;;
-    c ) create_database
+    c )
+    DATABASE_FOUND="false"
+    while [[ $DATABASE_FOUND = "false" ]]; do
+      read_database
+      create_database
+    done
     ;;
     d ) drop_database
     ;;
     h ) ustat_help
     ;;
-    i ) influxdb_database="$OPTARG"; echo "influxdb_database=$OPTARG"
+    i ) INFLUXDB_DATABASE="$OPTARG"; echo "INFLUXDB_DATABASE=$OPTARG"
     ;;
-    o ) read_network_stats $network_interface; echo -e "timestamp=$timestamp rx=$rx tx=$tx"
+    o ) read_network_stats $NETWORK_INTERFACE; echo -e "TIMESTAMP=$TIMESTAMP rx=$rx tx=$tx"
     ;;
     p ) read_proc_load
     ;;
     r ) read_database
     ;;
     s ) show_databases
-    [[ $(ustat -s) =~ "$influxdb_database" ]] && echo "...database $influxdb_database found :)"
     ;;
     t ) interval="$OPTARG"
     ;;
     w )
-    show_databases
+    read_database
+    create_database
     while true; do
-      read_network_stats $network_interface
-      echo -e "influxdb_database=$influxdb_database measurement=$influxdb_database tag1=$network_interface \
-      rx=$rx tx=$tx timestamp=$timestamp"
-      write_a_point_to_influxdb $influxdb_database $influxdb_database $network_interface $rx $timestamp
+      read_network_stats $NETWORK_INTERFACE
+      echo -e "INFLUXDB_DATABASE=$INFLUXDB_DATABASE measurement=$INFLUXDB_DATABASE tag1=$NETWORK_INTERFACE \
+      rx=$rx tx=$tx TIMESTAMP=$TIMESTAMP"
+      write_a_point_to_influxdb $INFLUXDB_DATABASE $INFLUXDB_DATABASE $NETWORK_INTERFACE $rx $TIMESTAMP
       sleep $interval
     done
     ;;
