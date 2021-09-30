@@ -100,6 +100,7 @@ read_network_stats () {
 }
 
 show_databases () {
+  [[ $(ustat -s) =~ "$influxdb_database" ]] && echo "...database $influxdb_database found :)"
   curl -G "$influxdb_host/query?pretty=true" --data-urlencode 'q=SHOW DATABASES'
 }
 
