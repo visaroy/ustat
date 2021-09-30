@@ -69,7 +69,7 @@ done
 # database based on mac address for now, TODO: crypted, based on UUID and/or hardware IDs
 read_eth0_mac_address=`cat /sys/class/net/$network_interface/address | tr ':' ' ' | tr '\n' ' ' | sed 's/[[:space:]]//g'`
 
-initialize_matrics () {
+initialize_matrics () { # opendtsdb
   $read_eth0_mac_address
 #  /usr/share/opentsdb/bin/tsdb mkmetric $eth0_mac_address.proc.loadavg.1m
 #  /usr/share/opentsdb/bin/tsdb mkmetric $eth0_mac_address.proc.loadavg.5m
