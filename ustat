@@ -109,9 +109,14 @@ read_database () {
 }
 
 create_database () {
-  echo "create database $influxdb_database"
-#  curl -XPOST "$influxdb_host/query" -s --data-urlencode 'q=CREATE DATABASE "$influxdb_database"'
-  curl -XPOST "$influxdb_host/query" -s --data-urlencode "q=CREATE DATABASE $influxdb_database"
+  if [ $(ustat -r) ! =~ "database not found" ]; then
+    [[ $(ustat -s) =~ "$influxdb_database" ]] && echo "...database $influxdb_database found :)"
+  else
+    influxdb_database="$1"
+    echo "create database $influxdb_database"
+  #  curl -XPOST "$influxdb_host/query" -s --data-urlencode 'q=CREATE DATABASE "$influxdb_database"'
+    curl -XPOST "$influxdb_host/query" -s --data-urlencode "q=CREATE DATABASE $influxdb_database"
+  fi
 }
 
 drop_database () {
