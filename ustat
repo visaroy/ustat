@@ -7,7 +7,7 @@
 
 # selfupdate from github
 case $1 in
-    "--update")
+    "--update"|"--install")
     if ps -e >2&/dev/null; then _PS="ps -e"; else _PS="ps"; fi # check what command to show processes
     process=$($_PS | grep ustat | grep -v grep | grep -v $0)
     github_archive="https://github.com/visaroy/ustat/archive/refs/heads/master.zip"
@@ -205,7 +205,7 @@ do
       echo -e "INFLUXDB_DATABASE=$INFLUXDB_DATABASE measurement=$INFLUXDB_DATABASE tag1=$NETWORK_INTERFACE \
       rx=$rx tx=$tx TIMESTAMP=$TIMESTAMP"
       write_a_point_to_influxdb $INFLUXDB_DATABASE $INFLUXDB_DATABASE $NETWORK_INTERFACE $rx $TIMESTAMP
-      sleep $interval
+      sleep $INTERVAL
     done
     ;;
     :) echo "Option -$OPTARG requires an argument." >&2
