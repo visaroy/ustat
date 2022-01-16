@@ -215,7 +215,6 @@ case $1 in
     echo "restart......"
     ;;
     "update"|"--update"|"install"|"--install")
-#    ustat_install
     if ps -e >/dev/null 2>&1; then _PS="ps -e"; else _PS="ps"; fi # check what command to show processes
     process=$($_PS | grep ustat | grep -v grep | grep -v $0)
     echo "process: "$process
@@ -255,7 +254,6 @@ EOF
 
         systemctl daemon-reload
         systemctl enable ustat.service
-#        pkill $process
         systemctl restart ustat
 #        chmod +x /etc/init.d/ustat
 #        cd /etc/init.d/; echo "/etc/init.d services: "; ls
