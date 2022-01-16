@@ -236,20 +236,20 @@ case $1 in
       else
         # cp ./etc/init.d/ustat /etc/init.d/ustat
 
-        cat > /etc/systemd/system/ustat.service << `EOF`
-        [Unit]
-        Description=Manage ustat service
+cat > /etc/systemd/system/ustat.service << `EOF`
+[Unit]
+Description=Manage ustat service
 
-        [Service]
-        Type=forking
-        ExecStart=/usr/bin/ustat start
-        ExecStop=/usr/bin/ustat stop
-        ExecReload=/usr/bin/ustat restart
-        User=root
+[Service]
+Type=forking
+ExecStart=/usr/bin/ustat start
+ExecStop=/usr/bin/ustat stop
+ExecReload=/usr/bin/ustat restart
+User=root
 
-        [Install]
-        WantedBy=multi-user.target
-        `EOF`
+[Install]
+WantedBy=multi-user.target
+`EOF`
 
         systemctl stop ustat
         systemctl daemon-reload
