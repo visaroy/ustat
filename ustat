@@ -187,61 +187,60 @@ ustat_install () { # install or selfupdate from github
 #    /etc/init.d/ustat restart
 }
 
-ustat_run () {
-  while getopts 'b c d h i: o p r s t: w' opt
-  do
-    case "${opt}" in
-      b ) _VERBOSE="true"
-      ;;
-      c )
-      DATABASE_FOUND="false"
-      while [[ $DATABASE_FOUND = "false" ]]; do
-        read_database
-        create_database
-      done
-      ;;
-      d ) drop_database
-      ;;
-      h ) ustat_help
-      ;;
-      i ) INFLUXDB_DATABASE="$OPTARG"; echo "INFLUXDB_DATABASE=$OPTARG"
-      ;;
-      o ) read_network_stats $NETWORK_INTERFACE; echo -e "TIMESTAMP=$TIMESTAMP rx=$rx tx=$tx"
-      ;;
-      p ) read_proc_load
-      ;;
-      r ) read_database
-      ;;
-      s ) show_databases
-      ;;
-      t ) interval="$OPTARG"
-      ;;
-      w )
+parse_config_file
+
+while getopts 'b c d h i: o p r s t: w' opt
+do
+  case "${opt}" in
+    b ) _VERBOSE="true"
+    ;;
+    c )
+    DATABASE_FOUND="false"
+    while [[ $DATABASE_FOUND = "false" ]]; do
       read_database
       create_database
-      while true; do
-        read_network_stats $NETWORK_INTERFACE
-        echo -e "INFLUXDB_DATABASE=$INFLUXDB_DATABASE measurement=$INFLUXDB_DATABASE tag1=$NETWORK_INTERFACE \
-        rx=$rx tx=$tx TIMESTAMP=$TIMESTAMP"
-        write_a_point_to_influxdb $INFLUXDB_DATABASE $INFLUXDB_DATABASE $NETWORK_INTERFACE $rx $TIMESTAMP
-        sleep $INTERVAL
-      done
-      ;;
-      :) echo "Option -$OPTARG requires an argument." >&2
-      ;;
-      *)  ustat_help; exit 0
-      ;;
-    esac
-  done
-  shift $((OPTIND-1))
-}
+    done
+    ;;
+    d ) drop_database
+    ;;
+    h ) ustat_help
+    ;;
+    i ) INFLUXDB_DATABASE="$OPTARG"; echo "INFLUXDB_DATABASE=$OPTARG"
+    ;;
+    o ) read_network_stats $NETWORK_INTERFACE; echo -e "TIMESTAMP=$TIMESTAMP rx=$rx tx=$tx"
+    ;;
+    p ) read_proc_load
+    ;;
+    r ) read_database
+    ;;
+    s ) show_databases
+    ;;
+    t ) interval="$OPTARG"
+    ;;
+    w )
+    read_database
+    create_database
+    while true; do
+      read_network_stats $NETWORK_INTERFACE
+      echo -e "INFLUXDB_DATABASE=$INFLUXDB_DATABASE measurement=$INFLUXDB_DATABASE tag1=$NETWORK_INTERFACE \
+      rx=$rx tx=$tx TIMESTAMP=$TIMESTAMP"
+      write_a_point_to_influxdb $INFLUXDB_DATABASE $INFLUXDB_DATABASE $NETWORK_INTERFACE $rx $TIMESTAMP
+      sleep $INTERVAL
+    done
+    ;;
+    :) echo "Option -$OPTARG requires an argument." >&2
+    ;;
+    *)  ustat_help; exit 0
+    ;;
+  esac
+done
+shift $((OPTIND-1))
 
 case $1 in
     "update"|"--update"|"install"|"--install")
     ustat_install
     ;;
     *)
-    parse_config_file
-    ustat_run
+    echo "exit..."; ustat_help; exit 0
     ;;
 esac
