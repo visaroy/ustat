@@ -1,4 +1,4 @@
-United Statistics
+United Statistics of Metrics
 # ⚛️ ustat
 for use in small Linux devices, minimalistic bash script sends metrics to supported databases:  
 * influxdb  
@@ -14,7 +14,7 @@ works on amd64, arm64, armel, armhf, i386, mips, mips64el, mipsel, ppc64el, s390
 wget https://github.com/visaroy/ustat/archive/refs/heads/master.zip
 unzip -o ./master.zip
 cd ./ustat-master
-sh ./install.sh
+sh ./ustat install
 ```
 
 # 2️⃣ EDIT config file
