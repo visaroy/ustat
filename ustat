@@ -210,8 +210,8 @@ case $1 in
     pkill ustat
     ;;
     restart|reset|reload)
-    (sleep 5; ustat stop) &
-    (sleep 15; ustat start) &
+    (sleep 2 && ustat stop) &
+    (sleep 5 && ustat start) &
     echo "restart......"
     ;;
     "update"|"--update"|"install"|"--install")
@@ -239,7 +239,7 @@ case $1 in
 
 cat > /etc/systemd/system/ustat.service << EOF
 [Unit]
-Description=Manage ustat service
+Description=Manage ustat service, United Stats
 
 [Service]
 Type=forking
@@ -254,7 +254,7 @@ EOF
 
         systemctl daemon-reload
         systemctl enable ustat.service
-        systemctl restart ustat
+        (sleep 2 && systemctl restart ustat) &
 #        chmod +x /etc/init.d/ustat
 #        cd /etc/init.d/; echo "/etc/init.d services: "; ls
 #        sudo update-rc.d -v ustat start 99 3 . stop 99 6 . >/dev/null 2>&1
