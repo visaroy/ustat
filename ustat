@@ -204,7 +204,7 @@ shift $((OPTIND-1))
 
 case $1 in
     start)
-    ustat -w
+    ustat -w &
     ;;
     stop)
     pkill ustat
