@@ -19,21 +19,21 @@ update-rc.d -v ustat start 99 3 . stop 99 6 .
 HELP
 
 case "$1" in
-start)
-        if [ -e "/usr/bin/ustat" ] ; then
-                /usr/bin/ustat -w &
-        fi
-        ;;
-stop)
-  killall -s SIGKILL ustat 2>/dev/null
+  start)
+    if [ -e "/usr/bin/ustat" ] ; then
+            /usr/bin/ustat -w &
+    fi
   ;;
-restart|reload)
- $0 stop
- sleep 1
- $0 start
-        ;;
-*)
-        echo "Usage: $0 start|stop|restart"
-        exit 1
-        ;;
+  stop)
+    killall -s SIGKILL ustat >/dev/null 2>&1
+  ;;
+  restart|reload)
+    $0 stop
+    sleep 1
+    $0 start
+  ;;
+  *)
+    echo "Usage: $0 start|stop|restart"
+    exit 1
+  ;;
 esac
