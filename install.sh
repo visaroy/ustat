@@ -36,4 +36,4 @@ else
     echo "* [ OK ] ustat service installed, usage: service ustat start"
     echo "... service"
 fi
-(sleep 3; echo -e "* [ OK ] ustat files updated ... \n"
+(sleep 3; echo -e "* [ OK ] ustat files updated ... \n")
