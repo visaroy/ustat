@@ -231,9 +231,7 @@ case $1 in
         sudo update-rc.d -v ustat start 99 3 . stop 99 6 . >/dev/null 2>&1
         sudo update-rc.d -f ustat defaults 99 >/dev/null 2>&1
         sudo update-rc.d -f ustat defaults
-        sleep 2
-        systemctl daemon-reload
-        sudo systemctl start ustat
+        (sleep 10 && systemctl daemon-reload; sudo systemctl start ustat)
         cd /
         echo "* [ OK ] ustat service installed, usage: service ustat start|stop|restart"
       fi
