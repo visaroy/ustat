@@ -241,6 +241,6 @@ case $1 in
     ustat_install
     ;;
     *)
-    echo "exit..."; ustat_help; exit 0
+    echo "exit..."; exit 0
     ;;
 esac
