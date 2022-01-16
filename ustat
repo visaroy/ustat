@@ -254,7 +254,7 @@ EOF
 
         systemctl daemon-reload
         systemctl enable ustat.service
-        bash (sleep 2; systemctl restart ustat) &
+        bash $(sleep 2; systemctl restart ustat) &
         cd /
         echo "* [ OK ] ustat service installed, usage: service ustat start|stop|restart"
 #        chmod +x /etc/init.d/ustat
