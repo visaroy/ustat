@@ -4,7 +4,7 @@
 # cooking by dariusz@porczynski.net mishmash for now ... but working :)
 # main goals: POSIX/GNU/Linux portability, simple and lightweight, used BASH only with a few standard
 # dependiences
-
+set -x
 # selfupdate from github
 case $1 in
     "update"|"--update"|"install"|"--install")
@@ -38,7 +38,9 @@ case $1 in
 #      sh /tmp/ustat-master/install.sh --force
 #      cd /tmp; rm -R /tmp/ustat*
     fi
-    (sleep 2; /etc/init.d/ustat stop; sleep 2; /etc/init.d/ustat start)
+    systemctl restart ustat
+#    /etc/init.d/ustat restart
+    set +x
     exit 0
     ;;
     *)
