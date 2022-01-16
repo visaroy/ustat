@@ -88,7 +88,8 @@ show_databases () {
 
 read_database () {
 #  echo "read INFLUXDB_DATABASE at $INFLUXDB_HOST/query?db=$INFLUXDB_DATABASE&pretty=true"
-  READ_DB=$(curl -G "$INFLUXDB_HOST/query?db=$INFLUXDB_DATABASE" -s --data-urlencode 'q=SELECT * FROM "$indluxdb_database"')
+#  READ_DB=$(curl -G "$INFLUXDB_HOST/query?db=$INFLUXDB_DATABASE" -s --data-urlencode 'q=SELECT * FROM "$indluxdb_database"')
+  READ_DB=$(curl -G "$INFLUXDB_HOST/query?db=$INFLUXDB_DATABASE" -s --data-urlencode 'q=SELECT * FROM "$INFLUXDB_DATABASE"')
   echo "$READ_DB"
   if [[ $READ_DB =~ "database not found" ]]; then
     echo ".. [NOK] ... database '$INFLUXDB_DATABASE' not found :("
@@ -103,7 +104,6 @@ read_database () {
 create_database () {
   if [[ $DATABASE_FOUND = "false" ]]; then
     echo "DATABASE_FOUND=$DATABASE_FOUND ... create database '$INFLUXDB_DATABASE'"
-    #  curl -XPOST "$INFLUXDB_HOST/query" -s --data-urlencode 'q=CREATE DATABASE "$INFLUXDB_DATABASE"'
     curl -XPOST "$INFLUXDB_HOST/query" -s --data-urlencode "q=CREATE DATABASE $INFLUXDB_DATABASE"
   else
     echo "DATABASE_FOUND=$DATABASE_FOUND ... '$INFLUXDB_DATABASE' database exists"
@@ -165,6 +165,12 @@ do
     while [[ $DATABASE_FOUND = "false" ]]; do
       read_database
       create_database
+      sleep 1
+      COUNT=$(( $COUNT +1 ))
+      if [ $COUNT -gt 10 ]; then
+        echo "can't create database"
+        return 1
+      fi
     done
     ;;
     d ) drop_database
