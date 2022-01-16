@@ -8,10 +8,10 @@
 # selfupdate from github
 case $1 in
     "update"|"--update"|"--install")
-    if ps -e >2&/dev/null; then _PS="ps -e"; else _PS="ps"; fi # check what command to show processes
+    if ps -e >/dev/null 2>&1; then _PS="ps -e"; else _PS="ps"; fi # check what command to show processes
     process=$($_PS | grep ustat | grep -v grep | grep -v $0)
     github_archive="https://github.com/visaroy/ustat/archive/refs/heads/master.zip"
-    rm -R /tmp/ustat* > 2&/dev/null
+    rm -R /tmp/ustat* > /dev/null 2>&1
     if ! wget -nv -O /tmp/ustat.zip --no-check-certificate $github_archive; then
       echo '[NOK] ERROR: there is no file $github_archive on the server...'
     else
