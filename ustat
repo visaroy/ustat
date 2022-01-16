@@ -154,36 +154,6 @@ ustat_help () {
 }
 
 ustat_install () { # install or selfupdate from github
-  if ps -e >/dev/null 2>&1; then _PS="ps -e"; else _PS="ps"; fi # check what command to show processes
-  process=$($_PS | grep ustat | grep -v grep | grep -v $0)
-  github_archive="https://github.com/visaroy/ustat/archive/refs/heads/master.zip"
-  rm -R /tmp/ustat* > /dev/null 2>&1
-  if ! wget -nv -O /tmp/ustat.zip --no-check-certificate $github_archive; then
-    echo '[NOK] ERROR: there is no file $github_archive on the server... exit'
-    exit 1
-  else
-    unzip -o -d /tmp /tmp/ustat.zip
-    cd /tmp/ustat-master
-    rm /usr/bin/ustat >/dev/null 2>&1
-    rm /etc/init.d/ustat >/dev/null 2>&1
-    [[ -f /etc/ustat.conf ]] && echo "* [ OK ] ustat.conf already in /etc"
-    [[ -f /etc/ustat.conf ]] || cp ./etc/ustat.conf /etc/ustat.conf; echo "* [ OK ] ustat.conf coppied to /etc"
-    [[ -x /usr/bin/ustat ]] && echo "* [ OK ] ustat script already installed"
-    [[ -x /usr/bin/ustat ]] || cp ./ustat /usr/bin/ustat; chmod +x /usr/bin/ustat; echo "* [ OK ] ustat script installed"
-    if [ -x /etc/init.d/ustat ]; then
-      echo "* [ OK ] ustat service already installed, usage: /etc/init.d/ustat start"
-    else
-      cp ./etc/init.d/ustat /etc/init.d/ustat
-      chmod +x /etc/init.d/ustat
-      cd /etc/init.d/
-      update-rc.d -v ustat start 99 3 . stop 99 6 . >/dev/null 2>&1
-      update-rc.d -f ustat defaults 99 >/dev/null 2>&1
-      cd /
-      echo "* [ OK ] ustat service installed, usage: service ustat start|stop|restart"
-    fi
-    exit 0
-  fi
-  systemctl restart ustat
 #    /etc/init.d/ustat restart
 }
 
@@ -238,7 +208,37 @@ shift $((OPTIND-1))
 
 case $1 in
     "update"|"--update"|"install"|"--install")
-    ustat_install
+#    ustat_install
+    if ps -e >/dev/null 2>&1; then _PS="ps -e"; else _PS="ps"; fi # check what command to show processes
+    process=$($_PS | grep ustat | grep -v grep | grep -v $0)
+    github_archive="https://github.com/visaroy/ustat/archive/refs/heads/master.zip"
+    rm -R /tmp/ustat* > /dev/null 2>&1
+    if ! wget -nv -O /tmp/ustat.zip --no-check-certificate $github_archive; then
+      echo '[NOK] ERROR: there is no file $github_archive on the server... exit'
+      exit 1
+    else
+      unzip -o -d /tmp /tmp/ustat.zip
+      cd /tmp/ustat-master
+      rm /usr/bin/ustat >/dev/null 2>&1
+      rm /etc/init.d/ustat >/dev/null 2>&1
+      [[ -f /etc/ustat.conf ]] && echo "* [ OK ] ustat.conf already in /etc"
+      [[ -f /etc/ustat.conf ]] || cp ./etc/ustat.conf /etc/ustat.conf; echo "* [ OK ] ustat.conf coppied to /etc"
+      [[ -x /usr/bin/ustat ]] && echo "* [ OK ] ustat script already installed"
+      [[ -x /usr/bin/ustat ]] || cp ./ustat /usr/bin/ustat; chmod +x /usr/bin/ustat; echo "* [ OK ] ustat script installed"
+      if [ -x /etc/init.d/ustat ]; then
+        echo "* [ OK ] ustat service already installed, usage: /etc/init.d/ustat start"
+      else
+        cp ./etc/init.d/ustat /etc/init.d/ustat
+        chmod +x /etc/init.d/ustat
+        cd /etc/init.d/
+        update-rc.d -v ustat start 99 3 . stop 99 6 . >/dev/null 2>&1
+        update-rc.d -f ustat defaults 99 >/dev/null 2>&1
+        cd /
+        echo "* [ OK ] ustat service installed, usage: service ustat start|stop|restart"
+      fi
+      exit 0
+    fi
+    systemctl restart ustat
     ;;
     *)
     echo "exit..."; exit 0
