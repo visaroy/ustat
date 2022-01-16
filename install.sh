@@ -34,6 +34,6 @@ else
     update-rc.d -f ustat defaults 99 >/dev/null
     cd /
     echo "* [ OK ] ustat service installed, usage: service ustat start"
+    echo "... service"
 fi
-
-echo "- use 'install.sh --force' if you want to to reinstall ..."
+(sleep 3; echo -e "* [ OK ] ustat files updated ... \n"
