@@ -210,7 +210,9 @@ case $1 in
     pkill ustat
     ;;
     restart)
-    echo "restart..."
+    (sleep 2; ustat stop) &
+    (sleep 5; ustat start) &
+    echo "restart......"
     ;;
     "update"|"--update"|"install"|"--install")
 #    ustat_install
