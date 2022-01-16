@@ -23,9 +23,16 @@ case $1 in
     (sleep 2; /etc/init.d/ustat stop; sleep 2; /etc/init.d/ustat start)
     exit 0
     ;;
+    *)
+    echo -e "* [error] wrong option, try: ustat -h"
+    ;;
 esac
 
 # parse config file
+
+parse_config_file () {
+  config="/etc/ustat.conf"
+}
 config="/etc/ustat.conf"
 INFLUXDB_DATABASE=$(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
 | grep database \
@@ -166,6 +173,7 @@ ustat_help () {
   -s \t\t\t show databases\n\
   -t [interval] \t interval in seconds eg. -t 5\n\
   -w \t\t\t write a point to influxdb database\n\
+  --update|update|--install \t - update ustat files and service (or install if not exists)
   Examples:\n\
   ustat -w \t\t\t - write 1 network metric every INTERVAL time to default database from /etc/ustat.conf \n\
   ustat -i data1 -w \t\t\t - write
