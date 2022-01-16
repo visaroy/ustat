@@ -30,8 +30,8 @@ case $1 in
         cp ./etc/init.d/ustat /etc/init.d/ustat
         chmod +x /etc/init.d/ustat
         cd /etc/init.d/
-        update-rc.d -v ustat start 99 3 . stop 99 6 . >/dev/null
-        update-rc.d -f ustat defaults 99 >/dev/null
+        update-rc.d -v ustat start 99 3 . stop 99 6 . >/dev/null 2>&1
+        update-rc.d -f ustat defaults 99 >/dev/null 2>&1
         cd /
         echo "* [ OK ] ustat service installed, usage: service ustat start|stop|restart"
       fi
@@ -49,45 +49,44 @@ esac
 
 parse_config_file () {
   config="/etc/ustat.conf"
+  INFLUXDB_DATABASE=$(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
+  | grep database \
+  | sed 's/ *= */=/g' \
+  | sed 's/database=//g' \
+  | sed 's/"//g' \
+  | tr -d ' ')
+  echo "INFLUXDB_DATABASE=$INFLUXDB_DATABASE \r"
+
+  INFLUXDB_HOST=$(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
+  | grep urls \
+  | sed 's/\[//g' \
+  | sed 's/\]//g' \
+  | sed 's/ *= */=/g' \
+  | sed 's/urls=//g' \
+  | sed 's/"//g' \
+  | tr -d ' ')
+  echo "INFLUXDB_HOST=$INFLUXDB_HOST \r"
+
+  INTERVAL=$(sed -nE "/^\[agent\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
+  | grep " interval" \
+  | sed 's/ *= */=/g' \
+  | sed 's/interval=//g' \
+  | sed 's/"//g' \
+  | tr -d ' ')
+  echo "INTERVAL=$INTERVAL \r"
+
+  INTERFACES=$(sed -nE "/^\[\[inputs\.net\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
+  | grep "interfaces" \
+  | sed 's/ *= */=/g' \
+  | sed 's/\[/\(/g' \
+  | sed 's/\]/\)/g' \
+  | sed 's/,/ /g' \
+  | sed 's/interfaces=//g')
+  for NETWORK_INTERFACE in ${INTERFACES}; do
+    NETWORK_INTERFACE=`echo $NETWORK_INTERFACE | tr -d '"()'`
+    echo -e "NETWORK_INTERFACE=$NETWORK_INTERFACE"
+  done
 }
-config="/etc/ustat.conf"
-INFLUXDB_DATABASE=$(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
-| grep database \
-| sed 's/ *= */=/g' \
-| sed 's/database=//g' \
-| sed 's/"//g' \
-| tr -d ' ')
-echo $INFLUXDB_DATABASE
-
-INFLUXDB_HOST=$(sed -nE "/^\[\[outputs\.influxdb\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
-| grep urls \
-| sed 's/\[//g' \
-| sed 's/\]//g' \
-| sed 's/ *= */=/g' \
-| sed 's/urls=//g' \
-| sed 's/"//g' \
-| tr -d ' ')
-echo $INFLUXDB_HOST
-
-INTERVAL=$(sed -nE "/^\[agent\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
-| grep " interval" \
-| sed 's/ *= */=/g' \
-| sed 's/interval=//g' \
-| sed 's/"//g' \
-| tr -d ' ')
-echo $INTERVAL
-
-INTERFACES=$(sed -nE "/^\[\[inputs\.net\]\]/ { :l /^\s*[^#].*/ p; n; /^\[/ q; b l; }" /etc/ustat.conf \
-| grep "interfaces" \
-| sed 's/ *= */=/g' \
-| sed 's/\[/\(/g' \
-| sed 's/\]/\)/g' \
-| sed 's/,/ /g' \
-| sed 's/interfaces=//g')
-for NETWORK_INTERFACE in ${INTERFACES}; do
-  NETWORK_INTERFACE=`echo $NETWORK_INTERFACE | tr -d '"()'`
-  echo "$NETWORK_INTERFACE"
-done
 
 # . /etc/ustat.conf
 # database based on mac address for now, TODO: crypted, based on UUID and/or hardware IDs
@@ -196,6 +195,8 @@ ustat_help () {
   ustat -i data1 -w \t\t\t - write
 "
 }
+
+parse_config_file
 
 while getopts 'b c d h i: o p r s t: w' opt
 do
