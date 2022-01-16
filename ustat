@@ -156,16 +156,19 @@ write_loop () {
 
 ustat_help () {
   echo -e "usage: ustat <-option>\n\
-  -b \t\t\t verbose\n\
-  -c \t\t\t create database\n\
-  -d \t\t\t drop database\n\
-  -i [database] \t database name\n\
+  -b \t\t\t - verbose\n\
+  -c \t\t\t - create database \n\
+  -d \t\t\t - drop database\n\
+  -i [database] \t - database name\n\
   -o [network_interface] \t network interface eg. -o eth0\n\
   -p \t\t\t read proc load\n\
   -r \t\t\t read database\n\
   -s \t\t\t show databases\n\
   -t [interval] \t interval in seconds eg. -t 5\n\
   -w \t\t\t write a point to influxdb database\n\
+  Examples:\n\
+  ustat -w \t\t\t - write 1 network metric every INTERVAL time to default database from /etc/ustat.conf \n\
+  ustat -i data1 -w \t\t\t - write 
 "
 }
 
