@@ -254,7 +254,7 @@ EOF
 
         systemctl daemon-reload
         systemctl enable ustat.service
-        (sleep 2 && systemctl restart ustat) &
+        bash (sleep 2 && systemctl restart ustat) &
 #        chmod +x /etc/init.d/ustat
 #        cd /etc/init.d/; echo "/etc/init.d services: "; ls
 #        sudo update-rc.d -v ustat start 99 3 . stop 99 6 . >/dev/null 2>&1
