@@ -33,6 +33,6 @@ else
     update-rc.d -v ustat start 99 3 . stop 99 6 . >/dev/null
     update-rc.d -f ustat defaults 99 >/dev/null
     cd /
-    echo "* [ OK ] ustat service installed, usage: service ustat start"
+    echo "* [ OK ] ustat service installed, usage: service ustat start|stop|restart"
 fi
 (sleep 3; echo -e "* [ OK ] ustat files updated ... \n")
