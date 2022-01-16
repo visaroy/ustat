@@ -153,10 +153,6 @@ ustat_help () {
 "
 }
 
-ustat_install () { # install or selfupdate from github
-#    /etc/init.d/ustat restart
-}
-
 parse_config_file
 
 while getopts 'b c d h i: o p r s t: w' opt
