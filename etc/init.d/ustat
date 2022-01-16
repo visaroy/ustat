@@ -3,7 +3,7 @@
 # Provides: cooking by Visaroy
 # Required-Start:
 # Required-Stop:
-# Default-Start:
+# Default-Start:  2 3 4 5
 # Default-Stop:      6
 # Short-Description: 'ustat' send data to timeseries database
 # Description:

@@ -7,7 +7,7 @@
 
 # selfupdate from github
 case $1 in
-    "--update"|"--install")
+    "update"|"--update"|"--install")
     if ps -e >2&/dev/null; then _PS="ps -e"; else _PS="ps"; fi # check what command to show processes
     process=$($_PS | grep ustat | grep -v grep | grep -v $0)
     github_archive="https://github.com/visaroy/ustat/archive/refs/heads/master.zip"
@@ -168,7 +168,7 @@ ustat_help () {
   -w \t\t\t write a point to influxdb database\n\
   Examples:\n\
   ustat -w \t\t\t - write 1 network metric every INTERVAL time to default database from /etc/ustat.conf \n\
-  ustat -i data1 -w \t\t\t - write 
+  ustat -i data1 -w \t\t\t - write
 "
 }
 
