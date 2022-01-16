@@ -1,12 +1,12 @@
 #!/bin/sh
 ### BEGIN INIT INFO
-# Provides: cooking by Visaroy
-# Required-Start:
-# Required-Stop:
+# Provides:       ustat
+# Required-Start: $network
+# Required-Stop:  $network
 # Default-Start:  2 3 4 5
-# Default-Stop:      6
-# Short-Description: 'ustat' send data to timeseries database
-# Description:
+# Default-Stop:   0 1 6
+# Short-Description: 'ustat' send data to timeseries database, minmalistic bash script
+# Description:    cooking by Visaroy
 ### END INIT INFO
 
 cat > /dev/null << HELP
