@@ -48,7 +48,7 @@ It is also used as standalone `ustat` shell command which sends specific data to
 ustat --help
 ```
 
-``` shell
+```
 ustat -options [value] <measurementName> <tagKey=tagValue> <fieldKey=fieldValue> [timestamp]
   -b                             - verbose
   -c                             - create database
@@ -62,7 +62,7 @@ ustat -options [value] <measurementName> <tagKey=tagValue> <fieldKey=fieldValue>
   -w                             - write a point to influxdb database
   --update|update|--install      - update ustat files and service (or install if not exists)
   ===== Examples: =====
-  ustat -w                       - write 1 network metric every INTERVAL time to default database from /etc/ustat.conf
+  ustat -w                       - write 1 metric every INTERVAL time to default database
   ustat -i data1 -w              - write metric point to data1 database
   ===== send data point from other shell scripts:
   ustat mySriptName function=functionName line=tookTime timestamp
