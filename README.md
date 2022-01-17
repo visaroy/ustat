@@ -1,7 +1,7 @@
 United Statistics of Metrics
 ### ⚛️ ustat
-for use in small Linux devices where only a shell is available or you don't want
-minimalistic bash script sends metrics to supported databases:  
+for use in small Linux devices where only a bash or shell is available or you don't want to install Python, Ruby, Go etc.  
+Minimalistic bash shell script sends metrics to supported databases:  
 * influxdb  
 * opentsdb *  
 * prometheus *  
