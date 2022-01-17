@@ -5,6 +5,7 @@
 # main goals: POSIX/GNU/Linux portability, simple and lightweight, used BASH only with a few standard
 # dependiences
 # . /etc/ustat.conf
+[[ -f /usr/bin/bashcolors ]] && ./ usr/bin/bashcolors
 
 parse_config_file () { # parse config file
   config="/etc/ustat.conf"
@@ -168,8 +169,8 @@ do
       sleep 1
       COUNT=$(( $COUNT +1 ))
       if [ $COUNT -gt 10 ]; then
-        echo "can't create database"
-        return 1
+        echo "* [ NOK ] can't create database"
+        exit 1
       fi
     done
     ;;
