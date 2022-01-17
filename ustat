@@ -134,11 +134,15 @@ write_loop () {
 }
 
 host_env_set () { # change database name and interface name in config file
+	echo "${FUNCNAME[0]} << ${FUNCNAME[1]}"
+  set -x
   database=$(cat /etc/hostname | tr '.:-' '_')
-  line=$(echo "'s/\"localhost\"/\"$database\"/g'")
+  echo -e "${lblu}* [ INFO ]${nocolor} read: database=$database"
+  #line=$(echo "'s/\"localhost\"/\"$database\"/g'")
   sed -i "s/\"localhost\"/\"$database\"/g" /etc/ustat.conf
   net_interface=$(ip route | grep default | sed -e "s/^.*dev.//" -e "s/.proto.*//" | tr -d ' \n')
   sed -i 's/\"eth0\"/\"$net_interface\"/g' /etc/ustat.conf
+  set +x
 }
 
 ustat_help () {
