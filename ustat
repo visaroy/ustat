@@ -82,9 +82,13 @@ read_network_stats () {
 show_databases () {
   show_db=$(curl -G "$INFLUXDB_HOST/query?pretty=true" -s --data-urlencode 'q=SHOW DATABASES')
   echo "$show_db"
-  [[ $show_db =~ "\"$INFLUXDB_DATABASE\"" ]] && echo "... [OK] ... database '$INFLUXDB_DATABASE' found :)"
-  [[ $show_db =~ "\"$INFLUXDB_DATABASE\"" ]] || echo "${lred}* [ NOK ]${nocolor} ... database '$INFLUXDB_DATABASE' not found :("
-  database_found="true"
+  if [[ $show_db =~ "\"$INFLUXDB_DATABASE\"" ]]; then
+    echo -e "${gre}* [ OK ]${nocolor} ... database '$INFLUXDB_DATABASE' found :)"
+    DATABASE_FOUND="true"
+  else
+    echo -e "${lred}* [ NOK ]${nocolor} ... database '$INFLUXDB_DATABASE' not found :("
+    DATABASE_FOUND="false"
+  fi
   return
 }
 
