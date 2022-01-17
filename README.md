@@ -49,15 +49,15 @@ ustat --help
 ```
 
 ``` shell
-ustat [measurementName] <tagKey=tagValue> <fieldKey=fieldValue> [timestamp]
+ustat -options [value] <measurementName> <tagKey=tagValue> <fieldKey=fieldValue> [timestamp]
   -b                             - verbose
   -c                             - create database
   -d                             - drop database
   -i [database]                  - database name
   -o [network_interface]         - network interface eg. -o eth0
   -p                             - read proc load
-  -r                             - read database
-  -s                             - show databases
+  -r                             - read default or specific database
+  -s                             - show all databases
   -t [interval]                  - interval in seconds eg. -t 5
   -w                             - write a point to influxdb database
   --update|update|--install      - update ustat files and service (or install if not exists)
