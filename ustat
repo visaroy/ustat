@@ -93,10 +93,10 @@ read_database () {
   READ_DB=$(curl -G "$INFLUXDB_HOST/query?db=$INFLUXDB_DATABASE" -s --data-urlencode 'q=SELECT * FROM "$INFLUXDB_DATABASE"')
   echo "$READ_DB"
   if [[ $READ_DB =~ "database not found" ]]; then
-    echo "${lred}* [ NOK ]${nocolor} ... database '$INFLUXDB_DATABASE' not found :("
+    echo -e "${lred}* [ NOK ]${nocolor} ... database '$INFLUXDB_DATABASE' not found :("
     DATABASE_FOUND="false"
   else
-    echo "... [OK] ... database '$INFLUXDB_DATABASE' found :)"
+    echo -e "${gre}* [ OK ]${nocolor} ... database '$INFLUXDB_DATABASE' found :)"
     DATABASE_FOUND="true"
   fi
   return
@@ -177,7 +177,7 @@ do
       sleep 1
       COUNT=$(( $COUNT +1 ))
       if [ $COUNT -gt 10 ]; then
-        echo "${lred}* [ NOK ]${nocolor} can't create database"
+        echo -e "${lred}* [ NOK ]${nocolor} can't create database"
         exit 1
       fi
     done
@@ -209,7 +209,7 @@ do
       sleep $INTERVAL
     done
     ;;
-    :) echo "Option -$OPTARG requires an argument." >&2
+    :) echo -e "${lred}* [ NOK ]${nocolor}Option -$OPTARG requires an argument." >&2
     ;;
     *)  ustat_help; exit 0
     ;;
@@ -284,9 +284,9 @@ EOF
     "$1") # execute function
       $1 $2
       if [ ! $? == "0" ]; then
-        echo "${lred}* [ NOK ]${nocolor} $1 - function not found, try $0 --help"
+        echo -e "${lred}* [ NOK ]${nocolor} $1 - function not found, try $0 --help"
       else
-        echo "${gre}* [ OK ]${nocolor}$1 $2 $3 done"
+        echo -e "${gre}* [ OK ]${nocolor}$1 $2 $3 done"
       fi
     ;;
     *)
