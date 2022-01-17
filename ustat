@@ -44,6 +44,7 @@ parse_config_file () { # parse config file
     echo -e "NETWORK_INTERFACE=$NETWORK_INTERFACE"
   done
   echo "INFLUXDB_DATABASE=$INFLUXDB_DATABASE INFLUXDB_HOST=$INFLUXDB_HOST INTERVAL=$INTERVAL"
+  return
 }
 
 initialize_matrics () { # opendtsdb
@@ -135,11 +136,17 @@ write_loop () {
 
 host_env_set () { # change database name and interface name in config file
 	echo "${FUNCNAME[0]} << ${FUNCNAME[1]}"
-  database=$(cat /etc/hostname | tr '.:-' '_')
-  sed -i "s/\"localhost\"/\"$database\"/g" /etc/ustat.conf
-  net_interface=$(ip route | grep default | sed -e "s/^.*dev.//" -e "s/.proto.*//" | tr -d ' \n')
-  sed -i "s/\"eth0\"/\"$net_interface\"/g" /etc/ustat.conf
-  echo -e "${lblu}* [ INFO ]${nocolor} save in ustat.conf: database=$database net_interface=$net_interface"
+  host_name=$(cat /etc/hostname | tr '.:-' '_')
+  if [ "$host_name" ! == "$INFLUXDB_DATABASE"]; then
+    sed -i "s/\"localhost\"/\"$host_name\"/g" /etc/ustat.conf
+    parse_config_file
+  fi
+  real_net_interface=$(ip route | grep default | sed -e "s/^.*dev.//" -e "s/.proto.*//" | tr -d ' \n')
+  if [ "$reaal_net_interface" ! == "$NETWORK_INTERFACE"]; then
+    sed -i "s/\"$NETWORK_INTERFACE\"/\"$real_net_interface\"/g" /etc/ustat.conf
+    parse_config_file
+  fi
+  echo -e "${lblu}* [ INFO ]${nocolor} save in ustat.conf: host_name=$host_name real_net_interface=$real_net_interface"
 }
 
 do_install () {
@@ -253,6 +260,7 @@ do
     t ) interval="$OPTARG"
     ;;
     w )
+    host_env_set
     read_database
     create_database
     while true; do
@@ -273,13 +281,13 @@ done
 shift $((OPTIND-1))
 
 case $1 in
-    start)
+    "start")
       ustat -w &
     ;;
-    stop)
+    "stop")
       pkill ustat
     ;;
-    restart|reset|reload)
+    "restart"|"reset"|"reload")
       (sleep 2 && ustat stop) &
       (sleep 5 && ustat start) &
       echo "restart......"
