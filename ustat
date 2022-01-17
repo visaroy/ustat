@@ -133,6 +133,14 @@ write_loop () {
   done
 }
 
+host_env_set () { # change database name and interface name in config file
+  database=$(cat /etc/hostname)
+  sed -i 's/\"localhost\"/\"$database\"/g' /etc/ustat.conf
+  net_interface=$(ip route | grep default | sed -e "s/^.*dev.//" -e "s/.proto.*//" | tr -d ' \n')
+  sed -i 's/\"eth0\"/\"$net_interface\"/g' /etc/ustat.conf
+
+}
+
 ustat_help () {
   echo -e "usage: ustat <option>|[options] [value]\n\
   -b \t\t\t\t - verbose\n\
@@ -228,7 +236,7 @@ case $1 in
     github_archive="https://github.com/visaroy/ustat/archive/refs/heads/master.zip"
     rm -R /tmp/ustat* > /dev/null 2>&1
     if ! wget -nv -O /tmp/ustat.zip --no-check-certificate $github_archive; then
-      echo "${lred}* [ NOK ]${nocolor} ERROR: there is no file $github_archive on the server... exit"
+      echo -e "${lred}* [ NOK ]${nocolor} ERROR: there is no file $github_archive on the server... exit"
       exit 1
     else
       unzip -o -d /tmp /tmp/ustat.zip
@@ -273,7 +281,15 @@ EOF
       exit 0
     fi
     ;;
+    "$1") # execute function
+      $1 $2
+      if [ ! $? == "0" ]; then
+        echo "${lred}* [ NOK ]${nocolor} $1 - function not found, try $0 --help"
+      else
+        echo "${gre}* [ OK ]${nocolor}$1 $2 $3 done"
+      fi
+    ;;
     *)
-    echo "exit..."; exit 0
+    echo "try $0 -h \t\t - exit..."; exit 0
     ;;
 esac
