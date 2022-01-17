@@ -220,6 +220,8 @@ ustat_help () {
   ${yel} ===== Examples: =====${nocolor} \n\
   ustat -w \t\t\t - write 1 network metric every INTERVAL time to default database from /etc/ustat.conf \n\
   ustat -i data1 -w \t\t - write metric point to data1 database \n\
+  ustat measurementName tagKey=tagValue fieldKey=fieldValue timestamp \n\
+  eg.: ustat networkmeasurement interface=eth0 rx=1234098 timestamp \n\
   ustat -k tagKey -v tagValue -K fieldKey -V fieldValue -w \n\
   eg.: ustat -k interface -v eth0 -K rx -V 1234098 -w \t\t - write values to default database \n\
   ${gre}OK?${nocolor} \n
