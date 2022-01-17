@@ -136,10 +136,63 @@ write_loop () {
 host_env_set () { # change database name and interface name in config file
 	echo "${FUNCNAME[0]} << ${FUNCNAME[1]}"
   database=$(cat /etc/hostname | tr '.:-' '_')
-  echo -e "${lblu}* [ INFO ]${nocolor} read: database=$database"
   sed -i "s/\"localhost\"/\"$database\"/g" /etc/ustat.conf
   net_interface=$(ip route | grep default | sed -e "s/^.*dev.//" -e "s/.proto.*//" | tr -d ' \n')
   sed -i "s/\"eth0\"/\"$net_interface\"/g" /etc/ustat.conf
+  echo -e "${lblu}* [ INFO ]${nocolor} save in ustat.conf: database=$database net_interface=$net_interface"
+}
+
+do_install () {
+  if ps -e >/dev/null 2>&1; then _PS="ps -e"; else _PS="ps"; fi # check what command to show processes
+  process=$($_PS | grep ustat | grep -v grep | grep -v $0)
+  echo "process: "$process
+  github_archive="https://github.com/visaroy/ustat/archive/refs/heads/master.zip"
+  rm -R /tmp/ustat* > /dev/null 2>&1
+  if ! wget -nv -O /tmp/ustat.zip --no-check-certificate $github_archive; then
+    echo -e "${lred}* [ NOK ]${nocolor} ERROR: there is no file $github_archive on the server... exit"
+    exit 1
+  else
+    unzip -o -d /tmp /tmp/ustat.zip
+    cd /tmp/ustat-master
+    rm /usr/bin/ustat >/dev/null 2>&1
+    rm /etc/init.d/ustat >/dev/null 2>&1
+    if [ ! -f /etc/ustat.conf ] || [ "$2" = "--purge" ]; then
+        rm /etc/ustat.conf; cp ./etc/ustat.conf /etc/ustat.conf
+        echo -e "${gre}* [ OK ]${nocolor} (new) ustat.conf coppied to /etc"
+    else
+      echo -e "${gre}* [ OK ]${nocolor} ustat.conf already in /etc (do not touch)"
+    fi
+    if [ -x /usr/bin/ustat ]; then
+      echo -e "${gre}* [ OK ]${nocolor} ustat script already installed"
+    else
+      cp ./ustat /usr/bin/ustat
+      chmod +x /usr/bin/ustat
+      echo -e "${gre}* [ OK ]${nocolor} ustat script installed"
+    fi
+    rm /etc/systemd/system/ustat.service
+# create new ustat service
+cat > /etc/systemd/system/ustat.service << EOF
+[Unit]
+Description=Manage ustat service, United Stats
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/ustat start
+ExecStop=/usr/bin/ustat stop
+ExecReload=/usr/bin/ustat restart
+User=root
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    systemctl daemon-reload
+    systemctl enable ustat.service
+    bash $(sleep 2; systemctl restart ustat) &
+    cd /
+    echo -e "${gre}* [ OK ]${nocolor} ustat service installed, usage: service ustat start|stop|restart"
+    exit 0
+  fi
 }
 
 ustat_help () {
@@ -215,74 +268,29 @@ do
     *)  ustat_help; exit 0
     ;;
   esac
+  options="true"
 done
 shift $((OPTIND-1))
 
 case $1 in
     start)
-    ustat -w &
+      ustat -w &
     ;;
     stop)
-    pkill ustat
+      pkill ustat
     ;;
     restart|reset|reload)
-    (sleep 2 && ustat stop) &
-    (sleep 5 && ustat start) &
-    echo "restart......"
+      (sleep 2 && ustat stop) &
+      (sleep 5 && ustat start) &
+      echo "restart......"
     ;;
     "update"|"--update"|"install"|"--install")
-    if ps -e >/dev/null 2>&1; then _PS="ps -e"; else _PS="ps"; fi # check what command to show processes
-    process=$($_PS | grep ustat | grep -v grep | grep -v $0)
-    echo "process: "$process
-    github_archive="https://github.com/visaroy/ustat/archive/refs/heads/master.zip"
-    rm -R /tmp/ustat* > /dev/null 2>&1
-    if ! wget -nv -O /tmp/ustat.zip --no-check-certificate $github_archive; then
-      echo -e "${lred}* [ NOK ]${nocolor} ERROR: there is no file $github_archive on the server... exit"
-      exit 1
-    else
-      unzip -o -d /tmp /tmp/ustat.zip
-      cd /tmp/ustat-master
-      rm /usr/bin/ustat >/dev/null 2>&1
-      rm /etc/init.d/ustat >/dev/null 2>&1
-      if [ ! -f /etc/ustat.conf ] || [ "$2" = "--purge" ]; then
-          rm /etc/ustat.conf; cp ./etc/ustat.conf /etc/ustat.conf
-          echo -e "${gre}* [ OK ]${nocolor} (new) ustat.conf coppied to /etc"
-      else
-        echo -e "${gre}* [ OK ]${nocolor} ustat.conf already in /etc (do not touch)"
-      fi
-      if [ -x /usr/bin/ustat ]; then
-        echo -e "${gre}* [ OK ]${nocolor} ustat script already installed"
-      else
-        cp ./ustat /usr/bin/ustat
-        chmod +x /usr/bin/ustat
-        echo -e "${gre}* [ OK ]${nocolor} ustat script installed"
-      fi
-      rm /etc/systemd/system/ustat.service
-# create new ustat service
-cat > /etc/systemd/system/ustat.service << EOF
-[Unit]
-Description=Manage ustat service, United Stats
-
-[Service]
-Type=forking
-ExecStart=/usr/bin/ustat start
-ExecStop=/usr/bin/ustat stop
-ExecReload=/usr/bin/ustat restart
-User=root
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-      systemctl daemon-reload
-      systemctl enable ustat.service
-      bash $(sleep 2; systemctl restart ustat) &
-      cd /
-      echo -e "${gre}* [ OK ]${nocolor} ustat service installed, usage: service ustat start|stop|restart"
-      exit 0
-    fi
+      do_install
     ;;
     "$1") # execute function
+      if [ "$options" == "true" ]; then
+        exit 0
+      fi
       echo -e "${lblu}* [ INFO ]${nocolor} execute function: $1"
 #      $1 $2 > /dev/null 2>&1
       $1 $2
@@ -294,6 +302,6 @@ EOF
       fi
     ;;
     *)
-    echo "try $0 -h \t\t - exit..."; exit 0
+      echo "try $0 -h \t\t - exit..."; exit 0
     ;;
 esac
