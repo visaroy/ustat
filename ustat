@@ -41,9 +41,7 @@ parse_config_file () { # parse config file
   | sed 's/interfaces=//g')
   for NETWORK_INTERFACE in ${INTERFACES}; do
     NETWORK_INTERFACE=`echo $NETWORK_INTERFACE | tr -d '"()'`
-    echo -e "NETWORK_INTERFACE=$NETWORK_INTERFACE"
   done
-  echo "INFLUXDB_DATABASE=$INFLUXDB_DATABASE INFLUXDB_HOST=$INFLUXDB_HOST INTERVAL=$INTERVAL"
   return
 }
 
@@ -250,7 +248,7 @@ do
     ;;
     d ) drop_database
     ;;
-    h ) ustat_help
+    h ) ustat_help; exit 0
     ;;
     i ) INFLUXDB_DATABASE="$OPTARG"; echo "INFLUXDB_DATABASE=$OPTARG"
     ;;
@@ -281,6 +279,7 @@ do
     *)  ustat_help; exit 0
     ;;
   esac
+  echo "NETWORK_INTERFACE=$NETWORK_INTERFACE INFLUXDB_DATABASE=$INFLUXDB_DATABASE INFLUXDB_HOST=$INFLUXDB_HOST INTERVAL=$INTERVAL"
   options="true"
 done
 shift $((OPTIND-1))
