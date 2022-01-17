@@ -82,7 +82,7 @@ show_databases () {
   show_db=$(curl -G "$INFLUXDB_HOST/query?pretty=true" -s --data-urlencode 'q=SHOW DATABASES')
   echo "$show_db"
   [[ $show_db =~ "\"$INFLUXDB_DATABASE\"" ]] && echo "... [OK] ... database '$INFLUXDB_DATABASE' found :)"
-  [[ $show_db =~ "\"$INFLUXDB_DATABASE\"" ]] || echo ".. [NOK] ... database '$INFLUXDB_DATABASE' not found :("
+  [[ $show_db =~ "\"$INFLUXDB_DATABASE\"" ]] || echo "${lred}* [ NOK ]${nocolor} ... database '$INFLUXDB_DATABASE' not found :("
   database_found="true"
   return
 }
@@ -93,7 +93,7 @@ read_database () {
   READ_DB=$(curl -G "$INFLUXDB_HOST/query?db=$INFLUXDB_DATABASE" -s --data-urlencode 'q=SELECT * FROM "$INFLUXDB_DATABASE"')
   echo "$READ_DB"
   if [[ $READ_DB =~ "database not found" ]]; then
-    echo ".. [NOK] ... database '$INFLUXDB_DATABASE' not found :("
+    echo "${lred}* [ NOK ]${nocolor} ... database '$INFLUXDB_DATABASE' not found :("
     DATABASE_FOUND="false"
   else
     echo "... [OK] ... database '$INFLUXDB_DATABASE' found :)"
@@ -169,7 +169,7 @@ do
       sleep 1
       COUNT=$(( $COUNT +1 ))
       if [ $COUNT -gt 10 ]; then
-        echo "* [ NOK ] can't create database"
+        echo "${lred}* [ NOK ]${nocolor} can't create database"
         exit 1
       fi
     done
@@ -228,7 +228,7 @@ case $1 in
     github_archive="https://github.com/visaroy/ustat/archive/refs/heads/master.zip"
     rm -R /tmp/ustat* > /dev/null 2>&1
     if ! wget -nv -O /tmp/ustat.zip --no-check-certificate $github_archive; then
-      echo "${lred}[NOK] ERROR: there is no file $github_archive on the server... exit"
+      echo "${lred}* [ NOK ]${nocolor} ERROR: there is no file $github_archive on the server... exit"
       exit 1
     else
       unzip -o -d /tmp /tmp/ustat.zip
