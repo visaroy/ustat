@@ -91,7 +91,7 @@ show_databases () {
 read_database () {
 #  echo "read INFLUXDB_DATABASE at $INFLUXDB_HOST/query?db=$INFLUXDB_DATABASE&pretty=true"
 #  READ_DB=$(curl -G "$INFLUXDB_HOST/query?db=$INFLUXDB_DATABASE" -s --data-urlencode 'q=SELECT * FROM "$indluxdb_database"')
-  READ_DB=$(curl -G "$INFLUXDB_HOST/query?db=$INFLUXDB_DATABASE" -s --data-urlencode 'q=SELECT * FROM "$INFLUXDB_DATABASE"')
+  READ_DB=$(curl -G "$INFLUXDB_HOST/query?db=$INFLUXDB_DATABASE" -s --data-urlencode "q=SELECT count(*) FROM "$INFLUXDB_DATABASE"")
   echo "$READ_DB"
   if [[ $READ_DB =~ "database not found" ]]; then
     echo -e "${lred}* [ NOK ]${nocolor} ... database '$INFLUXDB_DATABASE' not found :("
