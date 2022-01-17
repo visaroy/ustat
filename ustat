@@ -205,7 +205,7 @@ EOF
 }
 
 ustat_help () {
-  echo -e "usage: ustat <option>|[options] [value]\n\
+  echo -e "${lblue}* [ HELP ]${nocolor} usage: ustat <option>|[options] [value]\n\
   -b \t\t\t\t - verbose\n\
   -c \t\t\t\t - create database \n\
   -d \t\t\t\t - drop database\n\
@@ -217,12 +217,12 @@ ustat_help () {
   -t [interval] \t\t - interval in seconds eg. -t 5\n\
   -w \t\t\t\t - write a point to influxdb database\n\
   --update|update|--install \t - update ustat files and service (or install if not exists)
-  Examples:\n\
+  ${yel} ===== Examples: =====${nocolor} \n\
   ustat -w \t\t\t - write 1 network metric every INTERVAL time to default database from /etc/ustat.conf \n\
   ustat -i data1 -w \t\t - write metric point to data1 database \n\
   ustat -k tagKey -v tagValue -K fieldKey -V fieldValue -w \n\
   eg.: ustat -k interface -v eth0 -K rx -V 1234098 -w \t\t - write values to default database \n\
-  ustat update \n
+  ${gre}OK?${nocolor} \n
 "
 }
 
