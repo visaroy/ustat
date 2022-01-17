@@ -138,7 +138,6 @@ host_env_set () { # change database name and interface name in config file
   sed -i 's/\"localhost\"/\"$database\"/g' /etc/ustat.conf
   net_interface=$(ip route | grep default | sed -e "s/^.*dev.//" -e "s/.proto.*//" | tr -d ' \n')
   sed -i 's/\"eth0\"/\"$net_interface\"/g' /etc/ustat.conf
-
 }
 
 ustat_help () {
@@ -287,7 +286,7 @@ EOF
         echo -e "${lred}* [ NOK ]${nocolor} $1 - function not found, try $0 --help \n"
         exit 1
       else
-        echo -e "${gre}* [ OK ]${nocolor}$1 $2 $3 done"
+        echo -e "${gre}* [ OK ]${nocolor}$1 $2 $3 done \n"
       fi
     ;;
     *)
