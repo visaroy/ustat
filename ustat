@@ -243,7 +243,7 @@ case $1 in
       cd /tmp/ustat-master
       rm /usr/bin/ustat >/dev/null 2>&1
       rm /etc/init.d/ustat >/dev/null 2>&1
-      if [ ! -f /etc/ustat.conf ] || [ "$2" == "--purge" ]; then
+      if [ ! -f /etc/ustat.conf ] || [ "$2" = "--purge" ]; then
           rm /etc/ustat.conf; cp ./etc/ustat.conf /etc/ustat.conf
           echo -e "${gre}* [ OK ]${nocolor} (new) ustat.conf coppied to /etc"
       else
