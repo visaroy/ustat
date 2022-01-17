@@ -104,10 +104,10 @@ read_database () {
 
 create_database () {
   if [[ $DATABASE_FOUND = "false" ]]; then
-    echo "DATABASE_FOUND=$DATABASE_FOUND ... create database '$INFLUXDB_DATABASE'"
+    echo -e "${lblu}* [ INFO ]${nocolor} ... create database '$INFLUXDB_DATABASE'"
     curl -XPOST "$INFLUXDB_HOST/query" -s --data-urlencode "q=CREATE DATABASE $INFLUXDB_DATABASE"
   else
-    echo "DATABASE_FOUND=$DATABASE_FOUND ... '$INFLUXDB_DATABASE' database exists"
+    echo -e "${lblu}* [ INFO ]${nocolor}DATABASE_FOUND=$DATABASE_FOUND ... '$INFLUXDB_DATABASE' database exists"
   fi
 }
 
