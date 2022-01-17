@@ -83,10 +83,10 @@ show_databases () {
   show_db=$(curl -G "$INFLUXDB_HOST/query?pretty=true" -s --data-urlencode 'q=SHOW DATABASES')
   echo "$show_db"
   if [[ $show_db =~ "\"$INFLUXDB_DATABASE\"" ]]; then
-    echo -e "${gre}* [ OK ]${nocolor} ... database '$INFLUXDB_DATABASE' found :)"
+    echo -e "${gre}* [ OK ]${nocolor} ... database '$INFLUXDB_DATABASE' found :) \n"
     DATABASE_FOUND="true"
   else
-    echo -e "${lred}* [ NOK ]${nocolor} ... database '$INFLUXDB_DATABASE' not found :("
+    echo -e "${lred}* [ NOK ]${nocolor} ... database '$INFLUXDB_DATABASE' not found :( \n"
     DATABASE_FOUND="false"
   fi
   return
@@ -98,10 +98,10 @@ read_database () {
   READ_DB=$(curl -G "$INFLUXDB_HOST/query?db=$INFLUXDB_DATABASE" -s --data-urlencode "q=SELECT count(*) FROM "$INFLUXDB_DATABASE"")
   echo "$READ_DB"
   if [[ $READ_DB =~ "database not found" ]]; then
-    echo -e "${lred}* [ NOK ]${nocolor} ... database '$INFLUXDB_DATABASE' not found :("
+    echo -e "${lred}* [ NOK ]${nocolor} ... database '$INFLUXDB_DATABASE' not found :(\n"
     DATABASE_FOUND="false"
   else
-    echo -e "${gre}* [ OK ]${nocolor} ... database '$INFLUXDB_DATABASE' found :)"
+    echo -e "${gre}* [ OK ]${nocolor} ... database '$INFLUXDB_DATABASE' found :) \n"
     DATABASE_FOUND="true"
   fi
   return
@@ -223,6 +223,7 @@ ustat_help () {
   ustat -w \t\t\t - write 1 network metric every INTERVAL time to default database from /etc/ustat.conf \n\
   ustat -i data1 -w \t\t - write metric point to data1 database \n\
   ustat -k tagKey -v tagValue -K fieldKey -V fieldValue -w \n\
+  eg.: ustat -k interface -v eth0 -K rx -V 1234098 -w \t\t - write values to default database \n\
   ustat update \n
 "
 }
