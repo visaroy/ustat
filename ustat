@@ -286,7 +286,9 @@ EOF
     fi
     ;;
     "$1") # execute function
-      $1 $2 > /dev/null 2>&1
+      echo -e "${lblu}* [ INFO ]${nocolor} execute function: $1"
+#      $1 $2 > /dev/null 2>&1
+      $1 $2
       if [ ! $? == "0" ]; then
         echo -e "${lred}* [ NOK ]${nocolor} $1 - function not found, try $0 --help \n"
         exit 1
