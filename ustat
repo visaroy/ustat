@@ -135,7 +135,8 @@ write_loop () {
 
 host_env_set () { # change database name and interface name in config file
   database=$(cat /etc/hostname)
-  sed -i 's/\"localhost\"/\"$database\"/g' /etc/ustat.conf
+  line=$(echo "'s/\"localhost\"/\"$database\"/g'")
+  sed -i "'s/\"localhost\"/\"$database\"/g'" /etc/ustat.conf
   net_interface=$(ip route | grep default | sed -e "s/^.*dev.//" -e "s/.proto.*//" | tr -d ' \n')
   sed -i 's/\"eth0\"/\"$net_interface\"/g' /etc/ustat.conf
 }
@@ -242,11 +243,11 @@ case $1 in
       cd /tmp/ustat-master
       rm /usr/bin/ustat >/dev/null 2>&1
       rm /etc/init.d/ustat >/dev/null 2>&1
-      if [ -f /etc/ustat.conf ]; then
-        echo -e "${gre}* [ OK ]${nocolor} ustat.conf already in /etc"
+      if [ ! -f /etc/ustat.conf ] || [ $2 == "--purge" ]; then
+          rm /etc/ustat.conf; cp ./etc/ustat.conf /etc/ustat.conf
+          echo -e "${gre}* [ OK ]${nocolor} (new) ustat.conf coppied to /etc"
       else
-        cp ./etc/ustat.conf /etc/ustat.conf
-        echo -e "${gre}* [ OK ]${nocolor} ustat.conf coppied to /etc"
+        echo -e "${gre}* [ OK ]${nocolor} ustat.conf already in /etc (do not touch)"
       fi
       if [ -x /usr/bin/ustat ]; then
         echo -e "${gre}* [ OK ]${nocolor} ustat script already installed"
