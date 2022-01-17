@@ -282,9 +282,10 @@ EOF
     fi
     ;;
     "$1") # execute function
-      $1 $2
+      $1 $2 > /dev/null 2>&1
       if [ ! $? == "0" ]; then
-        echo -e "${lred}* [ NOK ]${nocolor} $1 - function not found, try $0 --help"
+        echo -e "${lred}* [ NOK ]${nocolor} $1 - function not found, try $0 --help \n"
+        exit 1
       else
         echo -e "${gre}* [ OK ]${nocolor}$1 $2 $3 done"
       fi
